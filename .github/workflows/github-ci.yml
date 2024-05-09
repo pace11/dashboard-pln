@@ -13,4 +13,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Build Nextjs in Vercel
-        run: curl -X POST https://api.vercel.com/v1/integrations/deploy/prj_jIer281L6F3u1cYWGr23Fq6EKfMJ/e6JPVArRzt
+        run: curl -X POST https://api.vercel.com/v1/integrations/deploy/prj_nKQ9r4fb7JBbOOuri1jpiDkyGVuo/r0rGMJxR95
