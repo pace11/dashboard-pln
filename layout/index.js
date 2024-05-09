@@ -72,10 +72,10 @@ const LayoutApp = ({ children, isMobile }) => {
   }
 
   const items = [
-    // {
-    //   key: 'trash',
-    //   label: 'Trash',
-    // },
+    {
+      key: 'trash',
+      label: 'Trash',
+    },
     {
       key: 'logout',
       label: 'Logout',

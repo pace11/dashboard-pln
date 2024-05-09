@@ -1,11 +1,11 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
-import { Button, Form, Input, Row, Card, notification } from 'antd'
-import Link from 'next/link'
-import { MailTwoTone } from '@ant-design/icons'
-import React, { useState } from 'react'
 import { authApi } from '@/helpers/utils'
+import { MailTwoTone } from '@ant-design/icons'
+import { Button, Card, Form, Input, Row, notification } from 'antd'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { useState } from 'react'
 
 const ForgotPassword = () => {
   const router = useRouter()
@@ -74,7 +74,7 @@ const ForgotPassword = () => {
             fontWeight: 'bold',
           }}
         >
-          LUPA PASSWORD
+          FORGOT PASSWORD
         </h2>
         <Form
           name="basic"
@@ -116,15 +116,15 @@ const ForgotPassword = () => {
               htmlType="submit"
               block
             >
-              Submit
+              SUBMIT
             </Button>
           </Form.Item>
 
           <Form.Item>
             <p style={{ textAlign: 'center' }}>
-              Sudah punya akun ?{' '}
+              already have an account ?{' '}
               <Link className="register" href="/login">
-                Login disini
+                Login here
               </Link>
             </p>
           </Form.Item>

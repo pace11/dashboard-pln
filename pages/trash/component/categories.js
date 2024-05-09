@@ -1,62 +1,35 @@
-import { Card, Button, Table, Space, Modal, notification } from 'antd'
+/* eslint-disable react-hooks/rules-of-hooks */
+import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import {
-  ReloadOutlined,
   ExclamationCircleOutlined,
+  ReloadOutlined,
   RollbackOutlined,
 } from '@ant-design/icons'
-import { HookSwr } from '@/lib/hooks/HookSwr'
-import { restoreApi } from '@/helpers/utils'
+import { Button, Card, Modal, Space, Table } from 'antd'
 import dayjs from 'dayjs'
 
 const { confirm } = Modal
 
-const Agama = () => {
-  const { data, isLoading, reloadData } = HookSwr({
-    path: '/agama',
-    query: '?status=archived',
-  })
+const Categories = () => {
+  const { data, isLoading, fetchingData, useMutate } =
+    useQueriesMutation({
+      prefixUrl: '/categories/archived',
+    })
 
   const showConfirmRollback = (params) => {
     confirm({
-      title: 'Kembalikan data',
-      content: (
-        <p>
-          yakin untuk mengembalikan data ini `<b>{params.title}</b>` ?
-        </p>
-      ),
+      title: 'Restore Confirm',
+      content: <p>Are you sure to restore this data ?</p>,
       icon: <ExclamationCircleOutlined />,
-      okText: 'Ya, Kembalikan',
-      cancelText: 'Tidak',
-      onOk: () => {
-        restoreApi({
-          endpoint: `/agama/restore/${params.id}`,
+      okText: 'Yes',
+      cancelText: 'No',
+      onOk: async () => {
+        const response = await useMutate({
+          prefixUrl: `/category/restore/${params?.id}`,
         })
-          .then((res) => {
-            reloadData('?status=archived')
-            notification.success({
-              message: 'Info',
-              description: res?.data?.message,
-              duration: 1,
-            })
-          })
-          .catch((err) => {
-            if ([400].includes(err?.response?.status)) {
-              notification.warning({
-                message: err?.response?.data?.message,
-                description: JSON.stringify(
-                  err?.response?.data?.data,
-                ),
-                duration: 1,
-              })
-            }
-            if ([500].includes(err?.response?.status)) {
-              notification.error({
-                message: 'Error',
-                description: err?.response?.statusText,
-                duration: 1,
-              })
-            }
-          })
+        if (response?.success) {
+          fetchingData({ prefixUrl: '/categories/archived' })
+        }
       },
       onCancel: () => {},
     })
@@ -74,7 +47,12 @@ const Agama = () => {
       dataIndex: 'title',
     },
     {
-      title: 'Tanggal Dihapus',
+      title: 'Slug',
+      key: 'slug',
+      dataIndex: 'slug',
+    },
+    {
+      title: 'Deleted At',
       key: 'deleted_at',
       dataIndex: 'deleted_at',
       render: (deleted_at) =>
@@ -88,7 +66,7 @@ const Agama = () => {
             icon={<RollbackOutlined />}
             onClick={() => showConfirmRollback(item)}
           >
-            Kembalikan Data
+            Restore Data
           </Button>
         </Space>
       ),
@@ -97,15 +75,19 @@ const Agama = () => {
 
   return (
     <Card
-      title="Agama"
+      title="Categories"
       bordered={false}
       extra={[
-        <Space key="action-agama-trash">
+        <Space key="action-categories-trash">
           <Button
             icon={<ReloadOutlined />}
-            onClick={() => reloadData('?status=archived')}
+            onClick={() =>
+              fetchingData({
+                prefixUrl: `/categories/archived`,
+              })
+            }
           >
-            Refresh data
+            Reload Data
           </Button>
         </Space>,
       ]}
@@ -117,9 +99,22 @@ const Agama = () => {
         loading={isLoading}
         style={{ width: '100%' }}
         scroll={{ x: 1300 }}
+        size="small"
+        pagination={{
+          total: data?.pagination?.total,
+          current: data?.pagination?.currentPage,
+          pageSize: data?.pagination?.perPage,
+          showQuickJumper: false,
+          hideOnSinglePage: true,
+          showTotal: (total) => `${total} Data`,
+          onChange: (page) =>
+            fetchingData({
+              prefixUrl: `/categories/archived?page=${page}`,
+            }),
+        }}
       />
     </Card>
   )
 }
 
-export default Agama
+export default Categories

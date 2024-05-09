@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
-import { Button, Form, Input, Row, Card, notification } from 'antd'
+import { getMeApi, updatePasswordApi } from '@/helpers/utils'
 import { LockTwoTone } from '@ant-design/icons'
-import React, { useState, useEffect } from 'react'
-import { updatePasswordApi, getMeApi } from '@/helpers/utils'
+import { Button, Card, Form, Input, Row, notification } from 'antd'
 import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
 
 const ChangePassword = () => {
   const router = useRouter()
@@ -89,7 +89,7 @@ const ChangePassword = () => {
             fontWeight: 'bold',
           }}
         >
-          GANTI PASSWORD
+          CHANGE PASSWORD
         </h2>
         <Form
           name="basic"
@@ -112,7 +112,7 @@ const ChangePassword = () => {
             rules={[
               {
                 required: true,
-                message: 'Harap isikan password!',
+                message: 'Please enter password!',
               },
             ]}
             hasFeedback
@@ -131,7 +131,7 @@ const ChangePassword = () => {
             rules={[
               {
                 required: true,
-                message: 'Harap isi ulang password!',
+                message: 'Please enter password!',
               },
               ({ getFieldValue }) => ({
                 validator(_, value) {
@@ -139,7 +139,7 @@ const ChangePassword = () => {
                     return Promise.resolve()
                   }
                   return Promise.reject(
-                    new Error('Password yang diinputkan tidak sama!'),
+                    new Error('The password entered does not match!'),
                   )
                 },
               }),
@@ -148,7 +148,7 @@ const ChangePassword = () => {
           >
             <Input.Password
               prefix={<LockTwoTone twoToneColor="#1890FF" />}
-              placeholder="Ulangi Password ..."
+              placeholder="Repeat Password ..."
               size="large"
               disabled={!user}
             />
@@ -161,7 +161,7 @@ const ChangePassword = () => {
               htmlType="submit"
               block
             >
-              Submit
+              SUBMIT
             </Button>
           </Form.Item>
         </Form>

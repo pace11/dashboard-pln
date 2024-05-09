@@ -143,7 +143,7 @@ const Login = () => {
           </Form.Item>
 
           <Form.Item>
-            <Link href="/forgot-password">Lupa password?</Link>
+            <Link href="/forgot-password">Forgot Password?</Link>
           </Form.Item>
 
           <Form.Item>
@@ -153,7 +153,7 @@ const Login = () => {
               htmlType="submit"
               block
             >
-              Login
+              LOGIN
             </Button>
           </Form.Item>
 
