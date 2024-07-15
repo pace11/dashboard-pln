@@ -1,4 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
+import RoleComponentRender from '@/components/role-component-render'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import {
   CloseOutlined,
@@ -27,10 +28,6 @@ const TextEditor = dynamic(() => import('@/components/text-editor'), {
 const UploadImage = dynamic(() => import('@/components/upload-image'))
 
 export default function Edit({ isMobile, onClose, isOpen }) {
-  const { data: detailPost } = useQueriesMutation({
-    prefixUrl: `/post/${isOpen}`,
-    enabled: isOpen,
-  })
   const {
     data: categories,
     useMutate,
@@ -40,8 +37,9 @@ export default function Edit({ isMobile, onClose, isOpen }) {
   })
   const refButton = useRef(null)
   const [form] = Form.useForm()
-  const [isLoading, setLoading] = useState(false)
+
   const [fileList, setFileList] = useState([])
+  const [isEditing, setEditing] = useState(false)
 
   const onSubmitClick = () => {
     // `current` points to the mounted text input element
@@ -58,7 +56,7 @@ export default function Edit({ isMobile, onClose, isOpen }) {
       categories_id: values?.categories_id || '',
     }
     const response = await useMutate({
-      prefixUrl: `/post/${isOpen}`,
+      prefixUrl: `/post/${isOpen?.id}`,
       method: 'PATCH',
       payload,
     })
@@ -68,24 +66,33 @@ export default function Edit({ isMobile, onClose, isOpen }) {
     }
   }
 
+  console.log('isOpen => ', isOpen)
+
   const showConfirmClose = () => {
-    Modal.confirm({
-      title: 'Close Confirm',
-      content: (
-        <p>
-          Are you sure you want to leave this form? Previous data will
-          not be saved ?
-        </p>
-      ),
-      icon: <ExclamationCircleOutlined />,
-      okText: 'Yes',
-      cancelText: 'No',
-      onOk: () => {
-        onClose()
-        form.resetFields()
-      },
-      onCancel: () => {},
-    })
+    if (isEditing) {
+      Modal.confirm({
+        title: 'Close Confirm',
+        content: (
+          <p>
+            Are you sure you want to leave this form? Previous data
+            will not be saved ?
+          </p>
+        ),
+        icon: <ExclamationCircleOutlined />,
+        okText: 'Yes',
+        cancelText: 'No',
+        onOk: () => {
+          onClose()
+          form.resetFields()
+          setEditing(false)
+        },
+        onCancel: () => {},
+      })
+    } else {
+      onClose()
+      form.resetFields()
+      setEditing(false)
+    }
   }
 
   const HandleChangeUpload = (event) => {
@@ -133,27 +140,27 @@ export default function Edit({ isMobile, onClose, isOpen }) {
   }
 
   useEffect(() => {
-    if (isOpen) {
+    if (!!isOpen) {
       form.setFieldsValue({
-        title: detailPost?.data?.title || '',
-        description: detailPost?.data?.description || '',
-        thumbnail: detailPost?.data?.thumbnail || '',
-        posted: detailPost?.data?.posted || false,
-        banner: detailPost?.data?.banner || false,
-        categories_id: detailPost?.data?.categories_id || '',
+        title: isOpen?.title || '',
+        description: isOpen?.description || '',
+        thumbnail: isOpen?.thumbnail || '',
+        posted: isOpen?.posted || false,
+        banner: isOpen?.banner || false,
+        categories_id: isOpen?.categories_id || '',
       })
-      if (detailPost?.data?.thumbnail) {
+      if (isOpen?.thumbnail) {
         setFileList([
           {
             uid: '1',
-            name: `${detailPost?.data?.thumbnail}`,
+            name: `${isOpen?.thumbnail}`,
             status: 'done',
-            url: `${process.env.NEXT_PUBLIC_PATH_IMAGE}/${detailPost?.data?.thumbnail}`,
+            url: `${process.env.NEXT_PUBLIC_PATH_IMAGE}/${isOpen?.thumbnail}`,
           },
         ])
       }
     }
-  }, [isOpen, form, detailPost])
+  }, [isOpen, form])
 
   return (
     <Drawer
@@ -168,7 +175,7 @@ export default function Edit({ isMobile, onClose, isOpen }) {
           <Button
             onClick={showConfirmClose}
             icon={<CloseOutlined />}
-            disabled={isLoading}
+            disabled={isLoadingSubmit}
           >
             Cancel
           </Button>
@@ -176,7 +183,7 @@ export default function Edit({ isMobile, onClose, isOpen }) {
             onClick={() => onSubmitClick()}
             icon={<SaveOutlined />}
             type="primary"
-            loading={isLoading}
+            loading={isLoadingSubmit}
           >
             Save
           </Button>
@@ -196,9 +203,9 @@ export default function Edit({ isMobile, onClose, isOpen }) {
           remember: true,
         }}
         autoComplete="off"
-        // onFinishFailed={onFinishFailed}
         onFinish={onFinish}
         labelAlign="left"
+        onValuesChange={(value) => setEditing(!!value)}
       >
         <Form.Item
           label="Title"
@@ -258,16 +265,20 @@ export default function Edit({ isMobile, onClose, isOpen }) {
               </Select>
             </Form.Item>
           </Col>
-          <Col span={3}>
-            <Form.Item label="Posted" name="posted">
-              <Switch />
-            </Form.Item>
-          </Col>
-          <Col span={3}>
-            <Form.Item label="Banner" name="banner">
-              <Switch />
-            </Form.Item>
-          </Col>
+          <RoleComponentRender
+            condition={!!isOpen?.is_superadmin || !!isOpen?.is_admin}
+          >
+            <Col span={3}>
+              <Form.Item label="Posted" name="posted">
+                <Switch />
+              </Form.Item>
+            </Col>
+            <Col span={3}>
+              <Form.Item label="Banner" name="banner">
+                <Switch />
+              </Form.Item>
+            </Col>
+          </RoleComponentRender>
         </Row>
         <Form.Item label="Description" name="description">
           <TextEditor

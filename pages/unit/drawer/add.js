@@ -14,7 +14,7 @@ export default function Add({ isMobile, onClose, isOpenAdd }) {
 
   const OnFinish = async (values) => {
     const response = await useMutate({
-      prefixUrl: '/category',
+      prefixUrl: '/unit',
       payload: values,
     })
     if (response?.success) {

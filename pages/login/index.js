@@ -1,68 +1,35 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
-import { authApi } from '@/helpers/utils'
+import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import { LockTwoTone, MailTwoTone } from '@ant-design/icons'
-import { Button, Card, Form, Input, Row, notification } from 'antd'
+import { Button, Card, Form, Input, Row } from 'antd'
 import Cookies from 'js-cookie'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
 
 const cookie = require('cookie')
 
 const Login = () => {
   const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
+  const { useMutate, isLoadingSubmit } = useQueriesMutation({})
 
-  const onFinish = (values) => {
-    setIsLoading(true)
+  const onFinish = async (values) => {
     const expires = new Date()
     expires.setSeconds(expires.getSeconds() + 86400)
-    authApi({
-      endpoint: '/login',
+    const response = await useMutate({
+      prefixUrl: '/login',
       payload: values,
     })
-      .then((res) => {
-        if (res?.status === 200) {
-          setIsLoading(false)
-          Cookies.set('token_db_pln', res?.data?.data?.token, {
-            expires,
-            path: '/',
-          })
-          notification.success({
-            message: 'Info',
-            description: res?.data?.message,
-            duration: 1,
-          })
-          router.push({ pathname: '/' })
-        }
+    if (!!response?.success) {
+      Cookies.set('token_db_pln', response?.data?.token, {
+        expires,
+        path: '/',
       })
-      .catch((err) => {
-        if ([401].includes(err?.response?.status)) {
-          setIsLoading(false)
-          notification.error({
-            message: 'Error',
-            description: 'Login gagal',
-            duration: 1,
-          })
-        }
-        if ([500].includes(err?.response?.status)) {
-          setIsLoading(false)
-          notification.error({
-            message: 'Error',
-            description: err?.response?.statusText,
-            duration: 1,
-          })
-        }
-      })
+      router.push({ pathname: '/' })
+    }
   }
-
-  // const onFinishFailed = (errorInfo) => {
-
-  // 	console.log("Failed:", errorInfo);
-
-  // };
 
   return (
     <Row
@@ -148,7 +115,7 @@ const Login = () => {
 
           <Form.Item>
             <Button
-              loading={isLoading}
+              loading={isLoadingSubmit}
               type="primary"
               htmlType="submit"
               block

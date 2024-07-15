@@ -4,20 +4,21 @@ import {
   DeleteOutlined,
   EditOutlined,
   ExclamationCircleOutlined,
+  LockOutlined,
   PlusOutlined,
   ReloadOutlined,
 } from '@ant-design/icons'
-import { Button, Card, Modal, Space, Table } from 'antd'
+import { Button, Card, Modal, Space, Table, Tag } from 'antd'
 import dynamic from 'next/dynamic'
 import { useState } from 'react'
 
 const Add = dynamic(() => import('./drawer/add'))
 const Edit = dynamic(() => import('./drawer/edit'))
 
-const Jabatan = ({ isMobile }) => {
+const User = ({ isMobile }) => {
   const { data, isLoading, fetchingData, useMutate } =
     useQueriesMutation({
-      prefixUrl: '/categories',
+      prefixUrl: '/users',
     })
 
   const [isOpenAdd, setOpenAdd] = useState(false)
@@ -32,11 +33,11 @@ const Jabatan = ({ isMobile }) => {
       cancelText: 'No',
       onOk: async () => {
         const response = await useMutate({
-          prefixUrl: `/category/${params?.id}`,
+          prefixUrl: `/user/${params?.id}`,
           method: 'DELETE',
         })
         if (response?.success) {
-          fetchingData({ prefixUrl: '/categories' })
+          fetchingData({ prefixUrl: '/users' })
         }
       },
       onCancel: () => {},
@@ -45,14 +46,28 @@ const Jabatan = ({ isMobile }) => {
 
   const columns = [
     {
-      title: 'Title',
-      key: 'title',
-      dataIndex: 'title',
+      title: 'Name',
+      key: 'name',
+      dataIndex: 'name',
     },
     {
-      title: 'Slug',
-      key: 'slug',
-      dataIndex: 'slug',
+      title: 'Email',
+      key: 'email',
+      dataIndex: 'email',
+    },
+    {
+      title: 'Password',
+      key: 'password',
+      render: () => <Tag icon={<LockOutlined />}>*****</Tag>,
+    },
+    {
+      title: 'Type',
+      key: 'type',
+      dataIndex: 'type',
+    },
+    {
+      title: 'Unit',
+      render: (item) => item?.unit?.title || '',
     },
     {
       title: 'Aksi',
@@ -61,7 +76,7 @@ const Jabatan = ({ isMobile }) => {
           <Button
             type="dashed"
             icon={<EditOutlined />}
-            onClick={() => setOpenEdit(item?.id)}
+            onClick={() => setOpenEdit(item)}
           >
             Edit
           </Button>
@@ -79,10 +94,10 @@ const Jabatan = ({ isMobile }) => {
   ]
 
   const extraDesktop = [
-    <Space key="action-list-categories">
+    <Space key="action-list-user">
       <Button
         icon={<ReloadOutlined />}
-        onClick={() => fetchingData({ prefixUrl: '/categories' })}
+        onClick={() => fetchingData({ prefixUrl: '/users' })}
       >
         Reload Data
       </Button>
@@ -97,9 +112,9 @@ const Jabatan = ({ isMobile }) => {
   ]
 
   return (
-    <Card title="Categories" bordered={false} extra={extraDesktop}>
+    <Card title="User" bordered={false} extra={extraDesktop}>
       <Table
-        rowKey="list-categories"
+        rowKey="list-user"
         dataSource={data?.data}
         columns={columns}
         loading={isLoading}
@@ -114,7 +129,7 @@ const Jabatan = ({ isMobile }) => {
           hideOnSinglePage: true,
           showTotal: (total) => `${total} Data`,
           onChange: (page) =>
-            fetchingData({ prefixUrl: `/categories?page=${page}` }),
+            fetchingData({ prefixUrl: `/users?page=${page}` }),
         }}
       />
       {isOpenAdd && (
@@ -124,7 +139,7 @@ const Jabatan = ({ isMobile }) => {
           onClose={() => {
             setOpenAdd(false)
             Modal.destroyAll()
-            fetchingData({ prefixUrl: '/categories' })
+            fetchingData({ prefixUrl: '/users' })
           }}
         />
       )}
@@ -135,7 +150,7 @@ const Jabatan = ({ isMobile }) => {
           onClose={() => {
             setOpenEdit(false)
             Modal.destroyAll()
-            fetchingData({ prefixUrl: '/categories' })
+            fetchingData({ prefixUrl: '/users' })
           }}
         />
       )}
@@ -143,4 +158,4 @@ const Jabatan = ({ isMobile }) => {
   )
 }
 
-export default Jabatan
+export default User

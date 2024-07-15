@@ -1,3 +1,4 @@
+import { ProfileContextProvider } from '@/context/profileContextProvider'
 import '@/styles/globals.css'
 import 'dayjs/locale/id'
 import Cookies from 'js-cookie'
@@ -28,8 +29,10 @@ export default function App({ Component, pageProps }) {
   }
 
   return (
-    <Layout isMobile={isMobile}>
-      <Component {...pageProps} isMobile={isMobile} />
-    </Layout>
+    <ProfileContextProvider>
+      <Layout isMobile={isMobile}>
+        <Component {...pageProps} isMobile={isMobile} />
+      </Layout>
+    </ProfileContextProvider>
   )
 }

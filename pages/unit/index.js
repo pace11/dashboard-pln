@@ -9,15 +9,17 @@ import {
 } from '@ant-design/icons'
 import { Button, Card, Modal, Space, Table } from 'antd'
 import dynamic from 'next/dynamic'
+import { useRouter } from 'next/router'
 import { useState } from 'react'
 
 const Add = dynamic(() => import('./drawer/add'))
 const Edit = dynamic(() => import('./drawer/edit'))
 
-const Jabatan = ({ isMobile }) => {
+const Unit = ({ isMobile }) => {
+  const router = useRouter()
   const { data, isLoading, fetchingData, useMutate } =
     useQueriesMutation({
-      prefixUrl: '/categories',
+      prefixUrl: '/units',
     })
 
   const [isOpenAdd, setOpenAdd] = useState(false)
@@ -50,11 +52,6 @@ const Jabatan = ({ isMobile }) => {
       dataIndex: 'title',
     },
     {
-      title: 'Slug',
-      key: 'slug',
-      dataIndex: 'slug',
-    },
-    {
       title: 'Aksi',
       render: (item) => (
         <Space direction="horizontal">
@@ -79,10 +76,10 @@ const Jabatan = ({ isMobile }) => {
   ]
 
   const extraDesktop = [
-    <Space key="action-list-categories">
+    <Space key="action-list-unit">
       <Button
         icon={<ReloadOutlined />}
-        onClick={() => fetchingData({ prefixUrl: '/categories' })}
+        onClick={() => fetchingData({ prefixUrl: '/units' })}
       >
         Reload Data
       </Button>
@@ -97,9 +94,9 @@ const Jabatan = ({ isMobile }) => {
   ]
 
   return (
-    <Card title="Categories" bordered={false} extra={extraDesktop}>
+    <Card title="Unit" bordered={false} extra={extraDesktop}>
       <Table
-        rowKey="list-categories"
+        rowKey="list-unit"
         dataSource={data?.data}
         columns={columns}
         loading={isLoading}
@@ -114,7 +111,7 @@ const Jabatan = ({ isMobile }) => {
           hideOnSinglePage: true,
           showTotal: (total) => `${total} Data`,
           onChange: (page) =>
-            fetchingData({ prefixUrl: `/categories?page=${page}` }),
+            fetchingData({ prefixUrl: `/units?page=${page}` }),
         }}
       />
       {isOpenAdd && (
@@ -124,7 +121,7 @@ const Jabatan = ({ isMobile }) => {
           onClose={() => {
             setOpenAdd(false)
             Modal.destroyAll()
-            fetchingData({ prefixUrl: '/categories' })
+            fetchingData({ prefixUrl: '/units' })
           }}
         />
       )}
@@ -135,7 +132,7 @@ const Jabatan = ({ isMobile }) => {
           onClose={() => {
             setOpenEdit(false)
             Modal.destroyAll()
-            fetchingData({ prefixUrl: '/categories' })
+            fetchingData({ prefixUrl: '/units' })
           }}
         />
       )}
@@ -143,4 +140,4 @@ const Jabatan = ({ isMobile }) => {
   )
 }
 
-export default Jabatan
+export default Unit

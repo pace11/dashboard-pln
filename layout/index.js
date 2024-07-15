@@ -1,10 +1,14 @@
-import { HookSwr } from '@/lib/hooks/HookSwr'
+import { ProfileContext } from '@/context/profileContextProvider'
 import {
   DatabaseOutlined,
+  DeleteOutlined,
+  LogoutOutlined,
+  NotificationOutlined,
   ThunderboltOutlined,
   UserOutlined,
 } from '@ant-design/icons'
 import {
+  Badge,
   Breadcrumb,
   Dropdown,
   Layout,
@@ -16,23 +20,19 @@ import {
   theme,
 } from 'antd'
 import Head from 'next/head'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
-import Menus from './menu'
+import { useContext, useEffect, useState } from 'react'
+import { sidebarMenu } from './menu'
 
 const { Title } = Typography
 const { Header, Content, Footer, Sider } = Layout
 
 const LayoutApp = ({ children, isMobile }) => {
   const router = useRouter()
-  const { data: userDetail, isLoading } = HookSwr({
-    path: '/user/me',
-  })
+  const profileUser = useContext(ProfileContext)
   const [collapsed, setCollapsed] = useState(false)
   const [selectedKeys, setSelectedKeys] = useState(null)
-  const [itemBreadcrumbs, setItemBreadcrumbs] = useState([
-    { href: '/', title: 'Home' },
-  ])
   const [activeKey, setActiveKey] = useState('/')
   const {
     token: { colorBgContainer },
@@ -52,14 +52,6 @@ const LayoutApp = ({ children, isMobile }) => {
           `${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/${key}`,
         )
     }
-    if (selectedKeys.toString() !== '/') {
-      setItemBreadcrumbs((itemBreadcrumbs) => [
-        { ...itemBreadcrumbs[0] },
-        { title: selectedKeys.toString() },
-      ])
-    } else {
-      setItemBreadcrumbs([{ href: '/', title: 'Home' }])
-    }
     setSelectedKeys(selectedKeys)
   }
 
@@ -67,20 +59,49 @@ const LayoutApp = ({ children, isMobile }) => {
     const path = {
       logout: '/logout',
       trash: '/trash',
+      notifications: '/notifications',
     }
     router.push({ pathname: path[key] })
   }
 
-  const items = [
+  const items = ({ role = '' }) => [
     {
+      key: 'notifications',
+      label: <Badge dot>Notifications</Badge>,
+      icon: <NotificationOutlined />,
+    },
+    ['admin', 'superadmin'].includes(role) && {
       key: 'trash',
       label: 'Trash',
+      icon: <DeleteOutlined />,
     },
     {
       key: 'logout',
       label: 'Logout',
+      icon: <LogoutOutlined />,
     },
   ]
+
+  const nestedUrl = () => {
+    const arrayPath = String(router?.asPath)?.split('/')?.slice(1)
+    let path = '/'
+    const arr = [
+      {
+        url: '/',
+        title: 'Home',
+        isLastIndex: false,
+      },
+    ]
+    arrayPath?.map((item, idx) => {
+      path = path.concat(`${item}/`)
+      arr.push({
+        url: path,
+        title: item,
+        isLastIndex: arrayPath?.length === idx + 1,
+      })
+    })
+    return arr
+  }
 
   useEffect(() => {
     const newRouter = router?.asPath.replace('/', '').split('/')
@@ -88,14 +109,6 @@ const LayoutApp = ({ children, isMobile }) => {
       router?.asPath === '/' ? router?.asPath : newRouter
     setSelectedKeys(arrRouter)
     setActiveKey(arrRouter !== '/' ? `${arrRouter.toString()}` : '/')
-    if (arrRouter !== '/') {
-      setItemBreadcrumbs((itemBreadcrumbs) => [
-        { ...itemBreadcrumbs[0] },
-        { title: arrRouter.toString() },
-      ])
-    } else {
-      setItemBreadcrumbs([{ href: '/', title: 'Home' }])
-    }
   }, [router.asPath])
 
   return (
@@ -129,7 +142,7 @@ const LayoutApp = ({ children, isMobile }) => {
             onSelect={HandleMenuSelect}
             selectedKeys={selectedKeys}
             mode="inline"
-            items={Menus}
+            items={sidebarMenu({ role: profileUser?.type })}
           />
         </Sider>
         <Layout>
@@ -148,19 +161,18 @@ const LayoutApp = ({ children, isMobile }) => {
             <Row>
               <Dropdown.Button
                 size="middle"
-                loading={isLoading}
                 menu={{
-                  items,
+                  items: items({ role: profileUser?.type }),
                   onClick: onMenuClick,
                 }}
               >
-                {!isMobile ? userDetail?.data?.email : ''}
+                {!isMobile ? `Hi 👋, ${profileUser?.email}` : ''}
                 <Tag
                   color="green"
                   icon={<UserOutlined />}
                   style={{ marginLeft: '5px' }}
                 >
-                  {userDetail?.data?.role}
+                  {profileUser?.type}
                 </Tag>
               </Dropdown.Button>
             </Row>
@@ -174,10 +186,14 @@ const LayoutApp = ({ children, isMobile }) => {
             }}
           >
             <Breadcrumb
-              style={{
-                margin: '16px 0',
-              }}
-              items={itemBreadcrumbs}
+              items={nestedUrl()?.map((item) => ({
+                title: !item?.isLastIndex ? (
+                  <Link href={item?.url}>{item?.title}</Link>
+                ) : (
+                  item?.title
+                ),
+              }))}
+              style={{ padding: '10px 0' }}
             />
             {children}
           </Content>
@@ -195,7 +211,7 @@ const LayoutApp = ({ children, isMobile }) => {
               <Tabs
                 defaultActiveKey="/"
                 activeKey={activeKey}
-                items={Menus.map((item) => {
+                items={sidebarMenu().map((item) => {
                   return {
                     label: (
                       <span>

@@ -1,10 +1,18 @@
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import { CloseOutlined, SaveOutlined } from '@ant-design/icons'
 import { Button, Drawer, Form, Input, Space } from 'antd'
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 
-export default function Add({ isMobile, onClose, isOpenAdd }) {
-  const { useMutate, isLoadingSubmit } = useQueriesMutation({})
+export default function Edit({ isMobile, onClose, isOpen }) {
+  const {
+    data: detailCategory,
+    useMutate,
+    isLoadingSubmit,
+  } = useQueriesMutation({
+    prefixUrl: `/unit/${isOpen}`,
+    enabled: isOpen,
+  })
+
   const refButton = useRef(null)
   const [form] = Form.useForm()
 
@@ -14,7 +22,8 @@ export default function Add({ isMobile, onClose, isOpenAdd }) {
 
   const OnFinish = async (values) => {
     const response = await useMutate({
-      prefixUrl: '/category',
+      prefixUrl: `/unit/${isOpen}`,
+      method: 'PATCH',
       payload: values,
     })
     if (response?.success) {
@@ -23,16 +32,21 @@ export default function Add({ isMobile, onClose, isOpenAdd }) {
     }
   }
 
+  useEffect(() => {
+    if (isOpen) {
+      form.setFieldsValue({
+        title: detailCategory?.data?.title,
+      })
+    }
+  }, [isOpen, form, detailCategory])
+
   return (
     <Drawer
-      title={isMobile ? false : 'Add data'}
+      title={isMobile ? false : 'Edit data'}
       width={isMobile ? '100%' : 480}
       placement={isMobile ? 'bottom' : 'right'}
-      onClose={() => {
-        onClose()
-        form.resetFields()
-      }}
-      open={isOpenAdd}
+      onClose={onClose}
+      open={isOpen}
       bodyStyle={{ paddingBottom: 80 }}
       extra={
         <Space>
@@ -79,7 +93,7 @@ export default function Add({ isMobile, onClose, isOpenAdd }) {
           rules={[
             {
               required: true,
-              message: 'Please enter title!',
+              message: 'Harap isikan title!',
             },
           ]}
         >

@@ -1,4 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
+import RoleComponentRender from '@/components/role-component-render'
+import { ProfileContext } from '@/context/profileContextProvider'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import {
   CloseOutlined,
@@ -18,7 +20,7 @@ import {
   Switch,
 } from 'antd'
 import dynamic from 'next/dynamic'
-import { useRef, useState } from 'react'
+import { useContext, useRef, useState } from 'react'
 
 const TextEditor = dynamic(() => import('@/components/text-editor'), {
   ssr: false,
@@ -27,13 +29,15 @@ const TextEditor = dynamic(() => import('@/components/text-editor'), {
 const UploadImage = dynamic(() => import('@/components/upload-image'))
 
 export default function Add({ isMobile, onClose, isOpenAdd }) {
-  const { data: categories, useMutate } = useQueriesMutation({
+  const profileUser = useContext(ProfileContext)
+  const { useMutate, isLoadingSubmit } = useQueriesMutation({})
+  const { data: categories } = useQueriesMutation({
     prefixUrl: '/categories',
   })
   const refButton = useRef(null)
   const [form] = Form.useForm()
-  const [isLoading, setLoading] = useState(false)
   const [fileList, setFileList] = useState([])
+  const [isEditing, setEditing] = useState(false)
 
   const onSubmitClick = () => {
     // `current` points to the mounted text input element
@@ -57,23 +61,30 @@ export default function Add({ isMobile, onClose, isOpenAdd }) {
   }
 
   const showConfirmClose = () => {
-    Modal.confirm({
-      title: 'Close Confirm',
-      content: (
-        <p>
-          Are you sure you want to leave this form? Previous data will
-          not be saved ?
-        </p>
-      ),
-      icon: <ExclamationCircleOutlined />,
-      okText: 'Yes',
-      cancelText: 'No',
-      onOk: () => {
-        onClose()
-        form.resetFields()
-      },
-      onCancel: () => {},
-    })
+    if (isEditing) {
+      Modal.confirm({
+        title: 'Close Confirm',
+        content: (
+          <p>
+            Are you sure you want to leave this form? Previous data
+            will not be saved ?
+          </p>
+        ),
+        icon: <ExclamationCircleOutlined />,
+        okText: 'Yes',
+        cancelText: 'No',
+        onOk: () => {
+          onClose()
+          form.resetFields()
+          setEditing(false)
+        },
+        onCancel: () => {},
+      })
+    } else {
+      onClose()
+      form.resetFields()
+      setEditing(false)
+    }
   }
 
   const HandleChangeUpload = (event) => {
@@ -130,7 +141,7 @@ export default function Add({ isMobile, onClose, isOpenAdd }) {
           <Button
             onClick={showConfirmClose}
             icon={<CloseOutlined />}
-            disabled={isLoading}
+            disabled={isLoadingSubmit}
           >
             Cancel
           </Button>
@@ -138,7 +149,7 @@ export default function Add({ isMobile, onClose, isOpenAdd }) {
             onClick={() => onSubmitClick()}
             icon={<SaveOutlined />}
             type="primary"
-            loading={isLoading}
+            loading={isLoadingSubmit}
           >
             Save
           </Button>
@@ -161,6 +172,7 @@ export default function Add({ isMobile, onClose, isOpenAdd }) {
         // onFinishFailed={onFinishFailed}
         onFinish={onFinish}
         labelAlign="left"
+        onValuesChange={(value) => setEditing(!!value)}
       >
         <Form.Item
           label="Title"
@@ -219,16 +231,22 @@ export default function Add({ isMobile, onClose, isOpenAdd }) {
               </Select>
             </Form.Item>
           </Col>
-          <Col span={3}>
-            <Form.Item label="Posted" name="posted">
-              <Switch />
-            </Form.Item>
-          </Col>
-          <Col span={3}>
-            <Form.Item label="Banner" name="banner">
-              <Switch />
-            </Form.Item>
-          </Col>
+          <RoleComponentRender
+            condition={['superadmin', 'admin'].includes(
+              profileUser?.type,
+            )}
+          >
+            <Col span={3}>
+              <Form.Item label="Posted" name="posted">
+                <Switch />
+              </Form.Item>
+            </Col>
+            <Col span={3}>
+              <Form.Item label="Banner" name="banner">
+                <Switch />
+              </Form.Item>
+            </Col>
+          </RoleComponentRender>
         </Row>
         <Form.Item label="Description" name="description">
           <TextEditor

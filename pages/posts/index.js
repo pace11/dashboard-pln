@@ -1,12 +1,14 @@
 /* eslint-disable react-hooks/rules-of-hooks */
+import RoleComponentRender from '@/components/role-component-render'
 import { IMAGE_FALLBACK } from '@/constants'
+import { ProfileContext } from '@/context/profileContextProvider'
+import { labelStatus, labelYesNo, roleUser } from '@/helpers/utils'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import {
-  CheckCircleOutlined,
-  CloseCircleOutlined,
   DeleteOutlined,
   EditOutlined,
   ExclamationCircleOutlined,
+  EyeOutlined,
   PlusOutlined,
   ReloadOutlined,
   TagsOutlined,
@@ -24,14 +26,15 @@ import {
 import dayjs from 'dayjs'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 
 const Add = dynamic(() => import('./drawer/add'))
 const Edit = dynamic(() => import('./drawer/edit'))
 
-const { Paragraph } = Typography
+const { Paragraph, Text } = Typography
 
-const Pegawai = ({ isMobile }) => {
+const Posts = ({ isMobile }) => {
+  const profileUser = useContext(ProfileContext)
   const { data, isLoading, fetchingData, useMutate } =
     useQueriesMutation({
       prefixUrl: '/posts',
@@ -84,12 +87,6 @@ const Pegawai = ({ isMobile }) => {
       ),
     },
     {
-      title: 'Description',
-      render: ({ description }) => (
-        <Paragraph ellipsis={{ rows: 4 }}>{description}</Paragraph>
-      ),
-    },
-    {
       title: 'Category',
       render: ({ categories }) => (
         <Tag color="purple" icon={<TagsOutlined />}>
@@ -98,42 +95,29 @@ const Pegawai = ({ isMobile }) => {
       ),
     },
     {
-      title: 'Posted By',
-      render: ({ user }) => (
-        <Space direction="vertical">
-          <span>{user?.name}</span>
-          <span>{user?.email}</span>
-        </Space>
-      ),
-    },
-    {
       title: 'Posted',
       key: 'posted',
       dataIndex: 'posted',
-      render: (posted) => (
-        <Tag
-          color={posted ? 'green' : 'magenta'}
-          icon={
-            posted ? <CheckCircleOutlined /> : <CloseCircleOutlined />
-          }
-        >
-          {posted ? 'Yes' : 'No'}
-        </Tag>
-      ),
+      render: (posted) => labelYesNo(posted),
     },
     {
       title: 'Banner',
       key: 'banner',
       dataIndex: 'banner',
-      render: (banner) => (
-        <Tag
-          color={banner ? 'green' : 'magenta'}
-          icon={
-            banner ? <CheckCircleOutlined /> : <CloseCircleOutlined />
-          }
-        >
-          {banner ? 'Yes' : 'No'}
-        </Tag>
+      render: (banner) => labelYesNo(banner),
+    },
+    {
+      title: 'Status',
+      key: 'status',
+      dataIndex: 'status',
+      render: (status) => labelStatus(status)?.tag,
+    },
+    {
+      title: 'Created By',
+      render: ({ user }) => (
+        <Space>
+          <Text>{user?.email}</Text>
+        </Space>
       ),
     },
     {
@@ -150,23 +134,44 @@ const Pegawai = ({ isMobile }) => {
       fixed: 'right',
       render: (item) => (
         <Space direction="vertical">
+          <RoleComponentRender
+            condition={
+              !!item?.is_own_post ||
+              !!item?.is_superadmin ||
+              !!item?.is_admin
+            }
+          >
+            <Button
+              type="dashed"
+              icon={<EditOutlined />}
+              onClick={() => setOpenEdit(item)}
+            >
+              Edit
+            </Button>
+          </RoleComponentRender>
           <Button
             type="dashed"
-            icon={<EditOutlined />}
-            onClick={() => setOpenEdit(item?.id)}
-            size="small"
+            icon={<EyeOutlined />}
+            onClick={() => router.push(`/posts/${item?.id}`)}
           >
-            Edit
+            Detail
           </Button>
-          <Button
-            danger
-            type="primary"
-            icon={<DeleteOutlined />}
-            onClick={() => showConfirmDelete(item)}
-            size="small"
+          <RoleComponentRender
+            condition={
+              !!item?.is_own_post ||
+              !!item?.is_superadmin ||
+              !!item?.is_admin
+            }
           >
-            Delete
-          </Button>
+            <Button
+              danger
+              type="primary"
+              icon={<DeleteOutlined />}
+              onClick={() => showConfirmDelete(item)}
+            >
+              Delete
+            </Button>
+          </RoleComponentRender>
         </Space>
       ),
     },
@@ -180,13 +185,21 @@ const Pegawai = ({ isMobile }) => {
       >
         Reload Data
       </Button>
-      <Button
-        type="primary"
-        icon={<PlusOutlined />}
-        onClick={() => setOpenAdd(true)}
+      <RoleComponentRender
+        condition={['creator', 'superadmin', 'admin'].includes(
+          roleUser({ user: profileUser }),
+        )}
       >
-        Add Post
-      </Button>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => {
+            setOpenAdd(true)
+          }}
+        >
+          Add Post
+        </Button>
+      </RoleComponentRender>
     </Space>,
   ]
 
@@ -198,7 +211,7 @@ const Pegawai = ({ isMobile }) => {
         columns={columns}
         loading={isLoading}
         style={{ width: '100%' }}
-        scroll={{ x: 1300 }}
+        scroll={{ x: 1300, y: '50vh' }}
         pagination={{
           total: data?.pagination?.total,
           current: data?.pagination?.currentPage,
@@ -229,7 +242,7 @@ const Pegawai = ({ isMobile }) => {
           onClose={() => {
             setOpenEdit(false)
             Modal.destroyAll()
-            fetchingData({ prefixUrl: '/posts' })
+            fetchingData({ prefixUrl: `/posts` })
           }}
         />
       )}
@@ -237,4 +250,4 @@ const Pegawai = ({ isMobile }) => {
   )
 }
 
-export default Pegawai
+export default Posts

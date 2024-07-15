@@ -130,7 +130,7 @@ const Posts = () => {
         columns={columns}
         loading={isLoading}
         style={{ width: '100%' }}
-        scroll={{ x: 1300 }}
+        scroll={{ x: 1300, y: '50vh' }}
         size="small"
         pagination={{
           total: data?.pagination?.total,

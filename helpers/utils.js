@@ -1,3 +1,9 @@
+import { USER_TYPE } from '@/constants'
+import {
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+} from '@ant-design/icons'
+import { Alert, Badge, Tag } from 'antd'
 import Axios from 'axios'
 import Cookies from 'js-cookie'
 
@@ -141,4 +147,60 @@ export const randomColor = () => {
     Math.random() * (color.length - 0) + 0,
   )
   return color[randomNumber]
+}
+
+export const labelStatus = (type) => {
+  const msg = {
+    pending: {
+      alert: <Alert message="Post Created" type="warning" showIcon />,
+      tag: <Badge status="processing" text="Created" />,
+    },
+    checked: {
+      alert: <Alert message="Post Checked" type="info" showIcon />,
+      tag: <Badge status="warning" text="Checked" />,
+    },
+    approved: {
+      alert: (
+        <Alert message="Post Approved" type="success" showIcon />
+      ),
+      tag: <Badge status="success" text="Approved" />,
+    },
+    rejected: {
+      alert: <Alert message="Post Rejected" type="error" showIcon />,
+      tag: <Badge status="error" text="Rejected" />,
+    },
+  }
+
+  return msg?.[type] ?? msg.pending
+}
+
+export const labelYesNo = (status) => {
+  return (
+    <Tag
+      color={status ? 'green' : 'magenta'}
+      icon={
+        status ? <CheckCircleOutlined /> : <CloseCircleOutlined />
+      }
+    >
+      {status ? 'Yes' : 'No'}
+    </Tag>
+  )
+}
+
+export const roleUser = ({ user = {} }) => {
+  return String(user?.type).toLocaleLowerCase()
+}
+
+export const newDateWithoutTimezone = (dateObj) => {
+  return new Date(dateObj).toLocaleString('en-US', {
+    timeZone: 'Asia/Jakarta',
+  })
+}
+
+export const mappingUserType = ({ user = {} }) => {
+  if (user?.type === 'superadmin') {
+    return USER_TYPE
+  }
+
+  return USER_TYPE?.filter((item) => !['admin'].includes(item))
 }
