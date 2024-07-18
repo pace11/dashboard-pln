@@ -97,7 +97,7 @@ const Jabatan = ({ isMobile }) => {
   ]
 
   return (
-    <Card title="Categories" bordered={false} extra={extraDesktop}>
+    <Card title="Category News" bordered={false} extra={extraDesktop}>
       <Table
         rowKey="list-categories"
         dataSource={data?.data}

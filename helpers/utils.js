@@ -5,6 +5,7 @@ import {
 } from '@ant-design/icons'
 import { Alert, Badge, Tag } from 'antd'
 import Axios from 'axios'
+import dayjs from 'dayjs'
 import Cookies from 'js-cookie'
 
 export const getMeApi = async ({ token }) => {
@@ -151,13 +152,25 @@ export const randomColor = () => {
 
 export const labelStatus = (type) => {
   const msg = {
-    pending: {
+    created: {
       alert: <Alert message="Post Created" type="warning" showIcon />,
       tag: <Badge status="processing" text="Created" />,
+    },
+    final_created: {
+      alert: (
+        <Alert message="Post Final Created" type="warning" showIcon />
+      ),
+      tag: <Badge status="processing" text="Final Created" />,
     },
     checked: {
       alert: <Alert message="Post Checked" type="info" showIcon />,
       tag: <Badge status="warning" text="Checked" />,
+    },
+    final_checked: {
+      alert: (
+        <Alert message="Post Final Checked" type="info" showIcon />
+      ),
+      tag: <Badge status="warning" text="Final Checked" />,
     },
     approved: {
       alert: (
@@ -165,13 +178,29 @@ export const labelStatus = (type) => {
       ),
       tag: <Badge status="success" text="Approved" />,
     },
+    final_approved: {
+      alert: (
+        <Alert
+          message="Post Final Approved"
+          type="success"
+          showIcon
+        />
+      ),
+      tag: <Badge status="success" text="Final Approved" />,
+    },
     rejected: {
       alert: <Alert message="Post Rejected" type="error" showIcon />,
       tag: <Badge status="error" text="Rejected" />,
     },
+    final_rejected: {
+      alert: (
+        <Alert message="Post Final Rejected" type="error" showIcon />
+      ),
+      tag: <Badge status="error" text="Final Rejected" />,
+    },
   }
 
-  return msg?.[type] ?? msg.pending
+  return msg?.[type] ?? msg.created
 }
 
 export const labelYesNo = (status) => {
@@ -204,3 +233,8 @@ export const mappingUserType = ({ user = {} }) => {
 
   return USER_TYPE?.filter((item) => !['admin'].includes(item))
 }
+
+export const formatDate = (date) =>
+  date ? dayjs(date).locale('id').format('DD MMMM YYYY HH:mm A') : '-'
+
+

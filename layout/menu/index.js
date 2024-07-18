@@ -13,21 +13,21 @@ export const sidebarMenu = ({ role = '' }) => [
     label: 'Home',
   },
   {
-    key: 'posts',
+    key: 'indicators',
     icon: <FileTextOutlined />,
-    label: 'Posts',
+    label: 'Indicators',
   },
-  ['admin', 'superadmin'].includes(role) && {
-    key: 'categories',
+  ['superadmin'].includes(role) && {
+    key: 'categories-news',
     icon: <TagsOutlined />,
-    label: 'Categories',
+    label: 'Categories News',
   },
   ['superadmin'].includes(role) && {
     key: 'unit',
     icon: <AimOutlined />,
     label: 'Unit',
   },
-  ['admin', 'superadmin'].includes(role) && {
+  ['superadmin'].includes(role) && {
     key: 'user',
     icon: <UserAddOutlined />,
     label: 'User',
