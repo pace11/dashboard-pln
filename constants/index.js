@@ -11,4 +11,45 @@ module.exports = {
     'Website',
     'Other',
   ],
+  USER_PLACEMENT: [
+    {
+      label: 'Kantor Induk',
+      value: 'main_office',
+    },
+    {
+      label: 'Unit Pelaksana',
+      value: 'executor_unit',
+    },
+  ],
+  STEP_PROGRESS: [
+    {
+      title: 'Created',
+    },
+    {
+      title: 'Checked',
+    },
+    {
+      title: 'Approved',
+    },
+    {
+      title: 'Final Checked',
+    },
+    {
+      title: 'Final Approved',
+    },
+  ],
+  KEY_STEP: {
+    created: 0,
+    checked: 1,
+    approved: 2,
+    rejected: 2,
+    final_created: 2,
+    final_checked: 3,
+    final_approved: 4,
+    final_rejected: 4,
+  },
+  COLOR: {
+    PRIMARY: '#1c94ad',
+    PRIMARY_HOVER: '#125f6f'
+  },
 }

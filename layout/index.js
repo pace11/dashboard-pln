@@ -1,11 +1,10 @@
 import { ProfileContext } from '@/context/profileContextProvider'
 import {
   DatabaseOutlined,
-  DeleteOutlined,
   LogoutOutlined,
   NotificationOutlined,
   ThunderboltOutlined,
-  UserOutlined,
+  UserOutlined
 } from '@ant-design/icons'
 import {
   Badge,
@@ -70,11 +69,11 @@ const LayoutApp = ({ children, isMobile }) => {
       label: <Badge dot>Notifications</Badge>,
       icon: <NotificationOutlined />,
     },
-    ['admin', 'superadmin'].includes(role) && {
-      key: 'trash',
-      label: 'Trash',
-      icon: <DeleteOutlined />,
-    },
+    // ['admin', 'superadmin'].includes(role) && {
+    //   key: 'trash',
+    //   label: 'Trash',
+    //   icon: <DeleteOutlined />,
+    // },
     {
       key: 'logout',
       label: 'Logout',

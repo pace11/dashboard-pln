@@ -1,3 +1,4 @@
+import { USER_PLACEMENT } from '@/constants'
 import { ProfileContext } from '@/context/profileContextProvider'
 import { mappingUserType } from '@/helpers/utils'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
@@ -17,6 +18,7 @@ export default function Edit({ isMobile, onClose, isOpen }) {
 
   const refButton = useRef(null)
   const [form] = Form.useForm()
+  const formPlacement = Form.useWatch('placement', form)
 
   const onSubmitClick = () => {
     refButton.current.click()
@@ -29,7 +31,9 @@ export default function Edit({ isMobile, onClose, isOpen }) {
         email: values?.email,
       }),
       ...(values?.password && { password: values?.password }),
-      unit_id: values?.unit_id,
+      placement: values?.placement || '',
+      unit_id:
+        values?.placement === 'main_office' ? null : values?.unit_id,
       type: values?.type,
     }
 
@@ -51,6 +55,7 @@ export default function Edit({ isMobile, onClose, isOpen }) {
         email: isOpen?.email,
         email_old: isOpen?.email,
         password: '',
+        placement: isOpen?.placement,
         unit_id: isOpen?.unit_id,
         type: isOpen?.type,
       })
@@ -136,14 +141,52 @@ export default function Edit({ isMobile, onClose, isOpen }) {
           <Input.Password placeholder="Password ..." size="large" />
         </Form.Item>
         <Form.Item
-          label="Unit"
-          name="unit_id"
+          label="Placement"
+          name="placement"
           rules={[
             {
               required: true,
-              message: 'Please select unit!',
+              message: 'Please select placement!',
             },
           ]}
+        >
+          <Select
+            size="large"
+            showSearch
+            placeholder="Select placement ..."
+            notFoundContent="Data not found"
+            filterOption={(input, option) =>
+              option.children
+                .toLowerCase()
+                .indexOf(input.toLowerCase()) >= 0
+            }
+            filterSort={(optionA, optionB) =>
+              optionA.children
+                .toLowerCase()
+                .localeCompare(optionB.children.toLowerCase())
+            }
+          >
+            {USER_PLACEMENT?.map((item) => (
+              <Select.Option key={item?.value} value={item?.value}>
+                {item?.label}
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
+        <Form.Item
+          label="Unit"
+          name="unit_id"
+          hidden={formPlacement === 'main_office'}
+          rules={
+            formPlacement === 'main_office'
+              ? []
+              : [
+                  {
+                    required: true,
+                    message: 'Please select unit!',
+                  },
+                ]
+          }
         >
           <Select
             size="large"

@@ -1,5 +1,7 @@
+import { COLOR } from '@/constants'
 import { ProfileContextProvider } from '@/context/profileContextProvider'
 import '@/styles/globals.css'
+import { ConfigProvider } from 'antd'
 import 'dayjs/locale/id'
 import Cookies from 'js-cookie'
 import { useEffect, useState } from 'react'
@@ -29,10 +31,34 @@ export default function App({ Component, pageProps }) {
   }
 
   return (
-    <ProfileContextProvider>
-      <Layout isMobile={isMobile}>
-        <Component {...pageProps} isMobile={isMobile} />
-      </Layout>
-    </ProfileContextProvider>
+    <ConfigProvider
+      theme={{
+        components: {
+          Menu: {
+            itemSelectedColor: COLOR.PRIMARY,
+          },
+          Tabs: {
+            itemHoverColor: COLOR.PRIMARY,
+            itemSelectedColor: COLOR.PRIMARY,
+            inkBarColor: COLOR.PRIMARY,
+            itemActiveColor: COLOR.PRIMARY,
+          },
+          Layout: {
+            triggerBg: COLOR.PRIMARY,
+          },
+          Button: {
+            colorPrimary: COLOR.PRIMARY,
+            colorPrimaryActive: COLOR.PRIMARY,
+            colorPrimaryHover: COLOR.PRIMARY_HOVER,
+          },
+        },
+      }}
+    >
+      <ProfileContextProvider>
+        <Layout isMobile={isMobile}>
+          <Component {...pageProps} isMobile={isMobile} />
+        </Layout>
+      </ProfileContextProvider>
+    </ConfigProvider>
   )
 }

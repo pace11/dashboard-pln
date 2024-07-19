@@ -34,9 +34,16 @@ export default function Home() {
             alignItems: 'center',
           }}
         >
-          <Typography.Title level={3}>
-            <AimOutlined /> Unit : {profileUser?.unit_id?.title}
-          </Typography.Title>
+          {profileUser?.type !== 'superadmin' && (
+            <Typography.Title level={3}>
+              <AimOutlined />
+              {`${
+                profileUser?.placement === 'main_office'
+                  ? ' Kantor Induk'
+                  : ` Unit: ${profileUser?.unit_id?.title}`
+              }`}
+            </Typography.Title>
+          )}
         </Col>
       </Row>
       <Row gutter={[14, 14]}>

@@ -1,8 +1,8 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import RoleComponentRender from '@/components/role-component-render'
-import { IMAGE_FALLBACK } from '@/constants'
+import { IMAGE_FALLBACK, KEY_STEP } from '@/constants'
 import { ProfileContext } from '@/context/profileContextProvider'
-import { formatDate, labelStatus } from '@/helpers/utils'
+import { stepProgress } from '@/helpers/utils'
 import LayoutIndicators from '@/layout/indicators'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import {
@@ -11,7 +11,6 @@ import {
   FileDoneOutlined,
   FileExclamationOutlined,
   FileSearchOutlined,
-  UserOutlined,
 } from '@ant-design/icons'
 import {
   Button,
@@ -24,8 +23,8 @@ import {
   Row,
   Select,
   Space,
+  Steps,
   Switch,
-  Table,
   Typography,
 } from 'antd'
 import dynamic from 'next/dynamic'
@@ -59,9 +58,6 @@ export default function PostsDetail({ isMobile }) {
     {
       onSuccess: ({ result }) => {
         form.setFieldsValue({
-          title: result?.data?.title || '',
-          description: result?.data?.description || '',
-          thumbnail: result?.data?.thumbnail || '',
           posted: result?.data?.posted || false,
           banner: result?.data?.banner || false,
           categories_id: result?.data?.categories_id || '',
@@ -95,11 +91,12 @@ export default function PostsDetail({ isMobile }) {
           <Form.Item label="Remarks" name="remarks">
             <Input.TextArea size="large" placeholder="Remarks ..." />
           </Form.Item>
-          {detailPost?.data?.status === 'final_checked' && type !== 'rejected' && (
-            <Form.Item label="Posted" name="posted">
-              <Switch />
-            </Form.Item>
-          )}
+          {detailPost?.data?.status === 'final_checked' &&
+            type !== 'rejected' && (
+              <Form.Item label="Posted" name="posted">
+                <Switch />
+              </Form.Item>
+            )}
         </Form>
       ),
       icon: <ExclamationCircleOutlined />,
@@ -126,6 +123,7 @@ export default function PostsDetail({ isMobile }) {
   return (
     <LayoutIndicators>
       <Card
+        loading={isLoading}
         extra={[
           <Space key="action-posts-detail">
             <RoleComponentRender
@@ -226,250 +224,132 @@ export default function PostsDetail({ isMobile }) {
           </Space>,
         ]}
       >
-        <Form
-          form={form}
-          name="basic"
-          labelCol={{
-            span: 24,
-          }}
-          wrapperCol={{
-            span: 24,
-          }}
-          initialValues={{
-            remember: true,
-          }}
-          autoComplete="off"
-          labelAlign="left"
-        >
-          <Row>
-            <Col span={24}>
-              {labelStatus(detailPost?.data?.status)?.alert}
-            </Col>
-          </Row>
-          <Form.Item
-            label="Title"
-            name="title"
-            rules={[
-              {
-                required: true,
-                message: 'please enter title!',
-              },
-            ]}
-          >
-            <Input.TextArea
-              size="large"
-              placeholder="Title ..."
-              disabled
-            />
-          </Form.Item>
-          <Form.Item label="Created By">
-            <Space>
-              <UserOutlined />
-              <Typography.Text>
-                {detailPost?.data?.user?.name}
-              </Typography.Text>
-              <Typography.Text>{`(${detailPost?.data?.user?.email})`}</Typography.Text>
-            </Space>
-          </Form.Item>
-          <Row gutter={[16, 16]}>
-            <Col span={10}>
-              <Image
-                src={`${process.env.NEXT_PUBLIC_PATH_IMAGE}/${detailPost?.data?.thumbnail}`}
-                alt={detailPost?.data?.thumbnail}
-                fallback={IMAGE_FALLBACK}
-              />
-            </Col>
-            <Col span={14}>
-              <Row gutter={[16, 16]}>
-                <Col lg={12}>
-                  <Form.Item
-                    label="Category"
-                    name="categories_id"
-                    rules={[
-                      {
-                        required: true,
-                        message: 'Please select category!',
-                      },
-                    ]}
-                  >
-                    <Select
-                      size="large"
-                      showSearch
-                      placeholder="Select category ..."
-                      notFoundContent="Data tidak ditemukan"
-                      disabled
-                      filterOption={(input, option) =>
-                        option.children
-                          .toLowerCase()
-                          .indexOf(input.toLowerCase()) >= 0
-                      }
-                      filterSort={(optionA, optionB) =>
-                        optionA.children
-                          .toLowerCase()
-                          .localeCompare(
-                            optionB.children.toLowerCase(),
-                          )
-                      }
-                    >
-                      {categories?.data?.map((item) => (
-                        <Select.Option
-                          key={item?.id}
-                          value={item?.id}
-                        >
-                          {item?.title}
-                        </Select.Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                </Col>
-                <Col lg={6}>
-                  <Form.Item label="Posted" name="posted">
-                    <Switch disabled />
-                  </Form.Item>
-                </Col>
-                <Col lg={6}>
-                  <Form.Item label="Banner" name="banner">
-                    <Switch disabled />
-                  </Form.Item>
-                </Col>
-              </Row>
-              <Row gutter={[16, 16]}>
-                <Col lg={24}>
-                  <Table
-                    columns={[
-                      {
-                        title: 'Checked By',
-                        render: (item) => (
-                          <Space direction="vertical">
-                            <Typography.Text>
-                              {formatDate(item?.checked_by_date)}
-                            </Typography.Text>
-                            <Typography.Text>
-                              {item?.checked_by_email}
-                            </Typography.Text>
-                            <Typography.Text mark>
-                              {item?.checked_by_remarks
-                                ? `remarks: ${item?.checked_by_remarks}`
-                                : ''}
-                            </Typography.Text>
-                          </Space>
-                        ),
-                      },
-                      {
-                        title: 'Final Checked By',
-                        render: (item) => (
-                          <Space direction="vertical">
-                            <Typography.Text>
-                              {formatDate(
-                                item?.final_checked_by_date,
-                              )}
-                            </Typography.Text>
-                            <Typography.Text>
-                              {item?.final_checked_by_email}
-                            </Typography.Text>
-                            <Typography.Text mark>
-                              {item?.final_checked_by_remarks
-                                ? `remarks: ${item?.final_checked_by_remarks}`
-                                : ''}
-                            </Typography.Text>
-                          </Space>
-                        ),
-                      },
-                      {
-                        title: 'Approved By',
-                        render: (item) => (
-                          <Space direction="vertical">
-                            <Typography.Text>
-                              {formatDate(item?.approved_by_date)}
-                            </Typography.Text>
-                            <Typography.Text>
-                              {item?.approved_by_email}
-                            </Typography.Text>
-                            <Typography.Text mark>
-                              {item?.approved_by_remarks
-                                ? `remarks: ${item?.approved_by_remarks}`
-                                : ''}
-                            </Typography.Text>
-                          </Space>
-                        ),
-                      },
-                      {
-                        title: 'Final Approved By',
-                        render: (item) => (
-                          <Space direction="vertical">
-                            <Typography.Text>
-                              {formatDate(
-                                item?.final_approved_by_date,
-                              )}
-                            </Typography.Text>
-                            <Typography.Text>
-                              {item?.final_approved_by_email}
-                            </Typography.Text>
-                            <Typography.Text mark>
-                              {item?.final_approved_by_remarks
-                                ? `remarks: ${item?.final_approved_by_remarks}`
-                                : ''}
-                            </Typography.Text>
-                          </Space>
-                        ),
-                      },
-                      {
-                        title: 'Rejected By',
-                        render: (item) => (
-                          <Space direction="vertical">
-                            <Typography.Text>
-                              {formatDate(item?.rejected_by_date)}
-                            </Typography.Text>
-                            <Typography.Text>
-                              {item?.rejected_by_email}
-                            </Typography.Text>
-                            <Typography.Text mark>
-                              {item?.rejected_by_remarks
-                                ? `remarks: ${item?.rejected_by_remarks}`
-                                : ''}
-                            </Typography.Text>
-                          </Space>
-                        ),
-                      },
-                      {
-                        title: 'Final Rejected By',
-                        render: (item) => (
-                          <Space direction="vertical">
-                            <Typography.Text>
-                              {formatDate(
-                                item?.final_rejected_by_date,
-                              )}
-                            </Typography.Text>
-                            <Typography.Text>
-                              {item?.final_rejected_by_email}
-                            </Typography.Text>
-                            <Typography.Text mark>
-                              {item?.final_rejected_by_remarks
-                                ? `remarks: ${item?.final_rejected_by_remarks}`
-                                : ''}
-                            </Typography.Text>
-                          </Space>
-                        ),
-                      },
-                    ]}
-                    dataSource={[detailPost?.data]}
-                    loading={isLoading}
-                    style={{ width: '100%' }}
+        <Row gutter={[24, 24]}>
+          <Col span={24}>
+            <Card title="Log Status" size="small">
+              <Row>
+                <Col span={24}>
+                  <Steps
                     size="small"
-                    pagination={false}
+                    current={KEY_STEP?.[detailPost?.data?.status]}
+                    status={
+                      ['rejected', 'final_rejected'].includes(
+                        detailPost?.data?.status,
+                      )
+                        ? 'error'
+                        : 'finish'
+                    }
+                    items={stepProgress({ data: detailPost?.data })}
                   />
                 </Col>
               </Row>
-            </Col>
-          </Row>
-          <Form.Item label="Description" name="description">
-            <div
-              dangerouslySetInnerHTML={{
-                __html: detailPost?.data?.description,
-              }}
-            />
-          </Form.Item>
-        </Form>
+            </Card>
+          </Col>
+          <Col span={24}>
+            <Card title="Detail" size="small">
+              <Form
+                form={form}
+                name="basic"
+                labelCol={{
+                  span: 24,
+                }}
+                wrapperCol={{
+                  span: 24,
+                }}
+                initialValues={{
+                  remember: true,
+                }}
+                autoComplete="off"
+                labelAlign="left"
+              >
+                <Form.Item label="Title" name="title">
+                  <Typography.Title level={3}>
+                    {detailPost?.data?.title}
+                  </Typography.Title>
+                </Form.Item>
+                <Row gutter={[24, 24]}>
+                  <Col span={8}>
+                    <Form.Item label="Created By">
+                      <Space direction="vertical">
+                        <Typography.Text>
+                          {detailPost?.data?.user?.name}
+                        </Typography.Text>
+                        <Typography.Text>{`(${detailPost?.data?.user?.email})`}</Typography.Text>
+                      </Space>
+                    </Form.Item>
+                  </Col>
+                  <Col span={8}>
+                    <Form.Item
+                      label="Category"
+                      name="categories_id"
+                      rules={[
+                        {
+                          required: true,
+                          message: 'Please select category!',
+                        },
+                      ]}
+                    >
+                      <Select
+                        size="large"
+                        showSearch
+                        placeholder="Select category ..."
+                        notFoundContent="Data tidak ditemukan"
+                        disabled
+                        filterOption={(input, option) =>
+                          option.children
+                            .toLowerCase()
+                            .indexOf(input.toLowerCase()) >= 0
+                        }
+                        filterSort={(optionA, optionB) =>
+                          optionA.children
+                            .toLowerCase()
+                            .localeCompare(
+                              optionB.children.toLowerCase(),
+                            )
+                        }
+                      >
+                        {categories?.data?.map((item) => (
+                          <Select.Option
+                            key={item?.id}
+                            value={item?.id}
+                          >
+                            {item?.title}
+                          </Select.Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+                  </Col>
+                  <Col span={4}>
+                    <Form.Item label="Posted" name="posted">
+                      <Switch disabled />
+                    </Form.Item>
+                  </Col>
+                  <Col span={4}>
+                    <Form.Item label="Banner" name="banner">
+                      <Switch disabled />
+                    </Form.Item>
+                  </Col>
+                </Row>
+                <Row gutter={[24, 24]}>
+                  <Col span={24}>
+                    <Image
+                      src={`${process.env.NEXT_PUBLIC_PATH_IMAGE}/${detailPost?.data?.thumbnail}`}
+                      alt={detailPost?.data?.thumbnail}
+                      fallback={IMAGE_FALLBACK}
+                    />
+                  </Col>
+                  <Col span={24}>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: detailPost?.data?.description,
+                      }}
+                    />
+                  </Col>
+                </Row>
+              </Form>
+            </Card>
+          </Col>
+        </Row>
       </Card>
       {isOpenEdit && (
         <Edit

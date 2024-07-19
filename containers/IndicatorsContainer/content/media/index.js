@@ -9,6 +9,7 @@ import {
   EditOutlined,
   ExclamationCircleOutlined,
   EyeOutlined,
+  LinkOutlined,
   PlusOutlined,
   ReloadOutlined,
 } from '@ant-design/icons'
@@ -59,7 +60,20 @@ const Media = ({ isMobile }) => {
     },
     {
       title: 'Url',
-      render: ({ url }) => <Paragraph>{url}</Paragraph>,
+      width: 300,
+      render: ({ url }) => (
+        <Space direction="vertical">
+          <Paragraph>{url}</Paragraph>
+          <Button
+            icon={<LinkOutlined />}
+            type="dashed"
+            onClick={() => window.open(url, '_blank')}
+            size="small"
+          >
+            Open Url
+          </Button>
+        </Space>
+      ),
     },
     {
       title: 'Caption',

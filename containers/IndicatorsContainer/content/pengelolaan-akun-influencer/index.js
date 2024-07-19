@@ -61,12 +61,13 @@ const PengelolaAkunInfluencer = ({ isMobile }) => {
     {
       title: 'Url',
       render: ({ url }) => (
-        <Space>
+        <Space direction="vertical">
           <Paragraph>{url}</Paragraph>
           <Button
             icon={<LinkOutlined />}
             type="dashed"
             onClick={() => window.open(url, '_blank')}
+            size="small"
           >
             Open Url
           </Button>

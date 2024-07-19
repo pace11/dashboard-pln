@@ -1,3 +1,4 @@
+import { USER_PLACEMENT } from '@/constants'
 import { ProfileContext } from '@/context/profileContextProvider'
 import { mappingUserType } from '@/helpers/utils'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
@@ -16,16 +17,27 @@ export default function Add({ isMobile, onClose, isOpenAdd }) {
   })
   const refButton = useRef(null)
   const [form] = Form.useForm()
+  const formPlacement = Form.useWatch('placement', form)
 
   const onSubmitClick = () => {
     refButton.current.click()
   }
 
   const OnFinish = async (values) => {
+    const payload = {
+      name: values?.name || '',
+      email: values?.email || '',
+      password: values?.password || '',
+      placement: values?.placement || '',
+      type: values?.type || '',
+      unit_id: values?.unit_id || null,
+    }
+
     const response = await useMutate({
       prefixUrl: '/register',
-      payload: values,
+      payload,
     })
+    
     if (response?.success) {
       form.resetFields()
       onClose()
@@ -120,14 +132,52 @@ export default function Add({ isMobile, onClose, isOpenAdd }) {
           <Input.Password placeholder="Password ..." size="large" />
         </Form.Item>
         <Form.Item
-          label="Unit"
-          name="unit_id"
+          label="Placement"
+          name="placement"
           rules={[
             {
               required: true,
-              message: 'Please select unit!',
+              message: 'Please select placement!',
             },
           ]}
+        >
+          <Select
+            size="large"
+            showSearch
+            placeholder="Select placement ..."
+            notFoundContent="Data not found"
+            filterOption={(input, option) =>
+              option.children
+                .toLowerCase()
+                .indexOf(input.toLowerCase()) >= 0
+            }
+            filterSort={(optionA, optionB) =>
+              optionA.children
+                .toLowerCase()
+                .localeCompare(optionB.children.toLowerCase())
+            }
+          >
+            {USER_PLACEMENT?.map((item) => (
+              <Select.Option key={item?.value} value={item?.value}>
+                {item?.label}
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
+        <Form.Item
+          label="Unit"
+          name="unit_id"
+          hidden={formPlacement === 'main_office'}
+          rules={
+            formPlacement === 'main_office'
+              ? []
+              : [
+                  {
+                    required: true,
+                    message: 'Please select unit!',
+                  },
+                ]
+          }
         >
           <Select
             size="large"

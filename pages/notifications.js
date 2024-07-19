@@ -37,7 +37,7 @@ export default function Notifications() {
               <Button
                 size="small"
                 onClick={() =>
-                  router.push(`/posts/${item?.posts_id}`)
+                  router.push(`/indicators/news/${item?.posts_id}`)
                 }
               >
                 See Details

@@ -66,6 +66,13 @@ const User = ({ isMobile }) => {
       dataIndex: 'type',
     },
     {
+      title: 'Placement',
+      render: (item) =>
+        item?.placement === 'main_office'
+          ? 'Kantor Induk'
+          : 'Unit Pelaksana',
+    },
+    {
       title: 'Unit',
       render: (item) => item?.unit?.title || '',
     },

@@ -3,7 +3,7 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
 } from '@ant-design/icons'
-import { Alert, Badge, Tag } from 'antd'
+import { Alert, Badge, Space, Tag, Typography } from 'antd'
 import Axios from 'axios'
 import dayjs from 'dayjs'
 import Cookies from 'js-cookie'
@@ -234,7 +234,122 @@ export const mappingUserType = ({ user = {} }) => {
   return USER_TYPE?.filter((item) => !['admin'].includes(item))
 }
 
-export const formatDate = (date) =>
-  date ? dayjs(date).locale('id').format('DD MMMM YYYY HH:mm A') : '-'
+export const formatDate = (date, isStrip = true) =>
+  date
+    ? dayjs(date).locale('id').format('DD MMMM YYYY HH:mm')
+    : isStrip
+    ? '-'
+    : ''
 
+export const stepProgress = ({ data = {} } = {}) => {
+  const mapping = [
+    {
+      title: 'Created',
+      description: formatDate(data?.created_at, false),
+    },
+    {
+      title: 'Checked',
+      description: (
+        <Space direction="vertical">
+          <Typography.Text type="secondary">
+            {formatDate(data?.checked_by_date, false)}
+          </Typography.Text>
+          <Typography.Text type="secondary">
+            {data?.checked_by_email}
+          </Typography.Text>
+          <Typography.Text mark>
+            {data?.checked_by_remarks
+              ? `remarks: ${data?.checked_by_remarks}`
+              : ''}
+          </Typography.Text>
+        </Space>
+      ),
+    },
+    {
+      title: 'Approved',
+      description: (
+        <>
+          <Space direction="vertical">
+            <Typography.Text type="secondary">
+              {formatDate(data?.approved_by_date, false)}
+            </Typography.Text>
+            <Typography.Text type="secondary">
+              {data?.approved_by_email}
+            </Typography.Text>
+            <Typography.Text mark>
+              {data?.approved_by_remarks
+                ? `remarks: ${data?.approved_by_remarks}`
+                : ''}
+            </Typography.Text>
+          </Space>
+          <Space direction="vertical">
+            <Typography.Text type="secondary">
+              {formatDate(data?.rejected_by_date, false)}
+            </Typography.Text>
+            <Typography.Text type="secondary">
+              {data?.rejected_by_email}
+            </Typography.Text>
+            <Typography.Text mark>
+              {data?.rejected_by_remarks
+                ? `remarks: ${data?.rejected_by_remarks}`
+                : ''}
+            </Typography.Text>
+          </Space>
+        </>
+      ),
+    },
+    {
+      title: 'Final Checked',
+      description: (
+        <Space direction="vertical">
+          <Typography.Text type="secondary">
+            {formatDate(data?.final_checked_by_date, false)}
+          </Typography.Text>
+          <Typography.Text type="secondary">
+            {data?.final_checked_by_email}
+          </Typography.Text>
+          <Typography.Text mark>
+            {data?.final_checked_by_remarks
+              ? `remarks: ${data?.final_checked_by_remarks}`
+              : ''}
+          </Typography.Text>
+        </Space>
+      ),
+    },
+    {
+      title: 'Final Approved',
+      description: (
+        <>
+          <Space direction="vertical">
+            <Typography.Text type="secondary">
+              {formatDate(data?.final_approved_by_date, false)}
+            </Typography.Text>
+            <Typography.Text type="secondary">
+              {data?.final_approved_by_email}
+            </Typography.Text>
+            <Typography.Text mark>
+              {data?.final_approved_by_remarks
+                ? `remarks: ${data?.final_approved_by_remarks}`
+                : ''}
+            </Typography.Text>
+          </Space>
+          <Space direction="vertical">
+            <Typography.Text type="secondary">
+              {formatDate(data?.final_rejected_by_date, false)}
+            </Typography.Text>
+            <Typography.Text type="secondary">
+              {data?.final_rejected_by_email}
+            </Typography.Text>
+            <Typography.Text mark>
+              {data?.final_rejected_by_remarks
+                ? `remarks: ${data?.final_rejected_by_remarks}`
+                : ''}
+            </Typography.Text>
+          </Space>
+        </>
+      ),
+    },
+  ]
 
+  return mapping
+}
