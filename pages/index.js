@@ -3,26 +3,41 @@ import { ProfileContext } from '@/context/profileContextProvider'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import {
   AimOutlined,
+  FileImageOutlined,
   FileTextOutlined,
   TagsOutlined,
-  UserOutlined,
+  UsergroupAddOutlined,
 } from '@ant-design/icons'
-import {
-  Badge,
-  Card,
-  Col,
-  Row,
-  Space,
-  Statistic,
-  Typography,
-} from 'antd'
+import { Card, Col, Row, Statistic, Typography } from 'antd'
+import dynamic from 'next/dynamic'
 import { useContext } from 'react'
+
+const BarReactChart = dynamic(
+  () => import('@/components/bar-react-chart'),
+  { ssr: false },
+)
 
 export default function Home() {
   const profileUser = useContext(ProfileContext)
-  const { data: grafik, isLoading } = useQueriesMutation({
-    prefixUrl: '/grafik',
+
+  const sizeWidth = {
+    col: ['superadmin'].includes(profileUser?.type) ? 12 : 6,
+    barWidth: ['superadmin'].includes(profileUser?.type) ? 750 : 300,
+  }
+
+  const { data: grafikCounts, isLoading } = useQueriesMutation({
+    prefixUrl: '/grafik/counts',
   })
+
+  const { data: grafikPosts, isLoading: isLoadingPost } =
+    useQueriesMutation({
+      prefixUrl: '/grafik/posts',
+    })
+
+  const { data: grafikUnit, isLoading: isLoadingUnit } =
+    useQueriesMutation({
+      prefixUrl: '/grafik/unit',
+    })
 
   return (
     <>
@@ -47,66 +62,89 @@ export default function Home() {
         </Col>
       </Row>
       <Row gutter={[14, 14]}>
-        <Col span={6}>
-          <Card bordered={false}>
-            <Row>
-              <Col span={6}>
-                <Statistic
-                  title="Total Post"
-                  value={grafik?.data?.post_count?.total_posts}
-                  prefix={<FileTextOutlined />}
-                  loading={isLoading}
-                />
-              </Col>
-              <Col span={12}>
-                <Space direction="vertical">
-                  <Badge
-                    status="processing"
-                    text={`${grafik?.data?.post_count?.created_posts} Posts Created`}
-                  />
-                  <Badge
-                    status="warning"
-                    text={`${grafik?.data?.post_count?.checked_posts} Posts Checked`}
-                  />
-                  <Badge
-                    status="success"
-                    text={`${grafik?.data?.post_count?.approved_posts} Posts Approved`}
-                  />
-                  <Badge
-                    status="error"
-                    text={`${grafik?.data?.post_count?.rejected_posts} Posts Rejected`}
-                  />
-                </Space>
-              </Col>
-            </Row>
-          </Card>
-        </Col>
-        <Col span={6}>
+        <Col span={4}>
           <Card bordered={false}>
             <Statistic
-              title="Total Category"
-              value={grafik?.data?.category_count}
+              title="Total News"
+              value={grafikCounts?.data?.post_count}
+              prefix={<FileTextOutlined />}
+              loading={isLoading}
+            />
+          </Card>
+        </Col>
+        <Col span={4}>
+          <Card bordered={false}>
+            <Statistic
+              title="Total Media Post"
+              value={grafikCounts?.data?.media_count}
+              prefix={<FileImageOutlined />}
+              loading={isLoading}
+            />
+          </Card>
+        </Col>
+        <Col span={4}>
+          <Card bordered={false}>
+            <Statistic
+              title="Total Category News"
+              value={grafikCounts?.data?.category_news_count}
               prefix={<TagsOutlined />}
               loading={isLoading}
             />
           </Card>
         </Col>
-        <RoleComponentRender
-          condition={['admin', 'superadmin'].includes(
-            profileUser?.type,
-          )}
-        >
-          <Col span={6}>
+        <Col span={4}>
+          <RoleComponentRender
+            condition={['superadmin'].includes(profileUser?.type)}
+          >
             <Card bordered={false}>
               <Statistic
                 title="Total User"
-                value={grafik?.data?.user_count}
-                prefix={<UserOutlined />}
+                value={grafikCounts?.data?.user_count}
+                prefix={<UsergroupAddOutlined />}
                 loading={isLoading}
               />
             </Card>
-          </Col>
-        </RoleComponentRender>
+          </RoleComponentRender>
+        </Col>
+
+        <Col span={4}>
+          <RoleComponentRender
+            condition={['superadmin'].includes(profileUser?.type)}
+          >
+            <Card bordered={false}>
+              <Statistic
+                title="Total Unit"
+                value={grafikCounts?.data?.unit_count}
+                prefix={<AimOutlined />}
+                loading={isLoading}
+              />
+            </Card>
+          </RoleComponentRender>
+        </Col>
+        <Col span={sizeWidth?.col}>
+          <Card
+            title="Grafik news unit with status"
+            bordered={false}
+            loading={isLoadingPost}
+          >
+            <BarReactChart
+              width={sizeWidth?.barWidth}
+              data={grafikPosts?.data}
+            />
+          </Card>
+        </Col>
+        <Col span={sizeWidth?.col}>
+          <Card
+            title="Grafik user unit with type"
+            bordered={false}
+            loading={isLoadingUnit}
+          >
+            <BarReactChart
+              width={sizeWidth?.barWidth}
+              data={grafikUnit?.data}
+            />
+          </Card>
+        </Col>
       </Row>
     </>
   )

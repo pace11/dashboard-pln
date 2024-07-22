@@ -2,7 +2,7 @@
 import RoleComponentRender from '@/components/role-component-render'
 import { IMAGE_FALLBACK, KEY_STEP } from '@/constants'
 import { ProfileContext } from '@/context/profileContextProvider'
-import { stepProgress } from '@/helpers/utils'
+import { labelYesNo, stepProgress } from '@/helpers/utils'
 import LayoutIndicators from '@/layout/indicators'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import {
@@ -11,6 +11,7 @@ import {
   FileDoneOutlined,
   FileExclamationOutlined,
   FileSearchOutlined,
+  RollbackOutlined,
 } from '@ant-design/icons'
 import {
   Button,
@@ -21,7 +22,6 @@ import {
   Input,
   Modal,
   Row,
-  Select,
   Space,
   Steps,
   Switch,
@@ -40,31 +40,16 @@ export default function PostsDetail({ isMobile }) {
   const [formStatus] = Form.useForm()
   const [isOpenEdit, setOpenEdit] = useState(false)
 
-  const { data: categories } = useQueriesMutation({
-    prefixUrl: '/categories',
-  })
-
   const {
     data: detailPost,
     fetchingData,
     isLoading,
-    useMutate,
-    isLoadingSubmit,
-  } = useQueriesMutation(
-    {
-      enabled: !!router?.query?.id,
-      prefixUrl: `/post/${router?.query?.id}`,
-    },
-    {
-      onSuccess: ({ result }) => {
-        form.setFieldsValue({
-          posted: result?.data?.posted || false,
-          banner: result?.data?.banner || false,
-          categories_id: result?.data?.categories_id || '',
-        })
-      },
-    },
-  )
+  } = useQueriesMutation({
+    enabled: !!router?.query?.id,
+    prefixUrl: `/post/${router?.query?.id}`,
+  })
+
+  const { isLoadingSubmit, useMutate } = useQueriesMutation({})
 
   const showConfirmChangeStatus = ({ type }) => {
     Modal.confirm({
@@ -117,6 +102,26 @@ export default function PostsDetail({ isMobile }) {
         }
       },
       onCancel: () => formStatus.resetFields(),
+    })
+  }
+
+  const showConfirmRecreate = ({ id }) => {
+    Modal.confirm({
+      title: 'Recreate post',
+      content: `Are you sure re-create this post ?`,
+      icon: <ExclamationCircleOutlined />,
+      okText: 'Yes',
+      cancelText: 'No',
+      onOk: async () => {
+        const response = await useMutate({
+          prefixUrl: `/post/recreate/${id}`,
+        })
+        
+        if (response?.success) {
+          router.push(`/indicators/news/`)
+        }
+      },
+      onCancel: () => {},
     })
   }
 
@@ -217,8 +222,30 @@ export default function PostsDetail({ isMobile }) {
                 type="dashed"
                 icon={<EditOutlined />}
                 onClick={() => setOpenEdit(detailPost?.data)}
+                hidden={['rejected', 'final_rejected'].includes(
+                  detailPost?.data?.status,
+                )}
               >
                 Edit
+              </Button>
+            </RoleComponentRender>
+            <RoleComponentRender
+              condition={
+                !!detailPost?.data?.is_own_post &&
+                !detailPost?.data?.recreated &&
+                ['rejected', 'final_rejected'].includes(
+                  detailPost?.data?.status,
+                )
+              }
+            >
+              <Button
+                type="primary"
+                icon={<RollbackOutlined />}
+                onClick={() =>
+                  showConfirmRecreate({ id: detailPost?.data?.id })
+                }
+              >
+                Re-create News
               </Button>
             </RoleComponentRender>
           </Space>,
@@ -279,64 +306,48 @@ export default function PostsDetail({ isMobile }) {
                     </Form.Item>
                   </Col>
                   <Col span={8}>
-                    <Form.Item
-                      label="Category"
-                      name="categories_id"
-                      rules={[
-                        {
-                          required: true,
-                          message: 'Please select category!',
-                        },
-                      ]}
-                    >
-                      <Select
-                        size="large"
-                        showSearch
-                        placeholder="Select category ..."
-                        notFoundContent="Data tidak ditemukan"
-                        disabled
-                        filterOption={(input, option) =>
-                          option.children
-                            .toLowerCase()
-                            .indexOf(input.toLowerCase()) >= 0
-                        }
-                        filterSort={(optionA, optionB) =>
-                          optionA.children
-                            .toLowerCase()
-                            .localeCompare(
-                              optionB.children.toLowerCase(),
-                            )
-                        }
-                      >
-                        {categories?.data?.map((item) => (
-                          <Select.Option
-                            key={item?.id}
-                            value={item?.id}
-                          >
-                            {item?.title}
-                          </Select.Option>
-                        ))}
-                      </Select>
+                    <Form.Item label="Category" name="categories_id">
+                      <Typography.Text>
+                        {detailPost?.data?.categories?.title}
+                      </Typography.Text>
                     </Form.Item>
                   </Col>
                   <Col span={4}>
                     <Form.Item label="Posted" name="posted">
-                      <Switch disabled />
+                      {labelYesNo(detailPost?.data?.posted)}
                     </Form.Item>
                   </Col>
                   <Col span={4}>
                     <Form.Item label="Banner" name="banner">
-                      <Switch disabled />
+                      {labelYesNo(detailPost?.data?.banner)}
                     </Form.Item>
                   </Col>
                 </Row>
                 <Row gutter={[24, 24]}>
                   <Col span={24}>
-                    <Image
-                      src={`${process.env.NEXT_PUBLIC_PATH_IMAGE}/${detailPost?.data?.thumbnail}`}
-                      alt={detailPost?.data?.thumbnail}
-                      fallback={IMAGE_FALLBACK}
-                    />
+                    <Row gutter={[24, 24]}>
+                      {detailPost?.data?.thumbnail ? (
+                        JSON.parse(detailPost?.data?.thumbnail)?.map(
+                          (item) => (
+                            <Col span={3} key={item?.uid}>
+                              <Image
+                                src={item?.url}
+                                alt={item?.name}
+                                fallback={IMAGE_FALLBACK}
+                              />
+                            </Col>
+                          ),
+                        )
+                      ) : (
+                        <Col span={3}>
+                          <Image
+                            src=""
+                            alt=""
+                            fallback={IMAGE_FALLBACK}
+                          />
+                        </Col>
+                      )}
+                    </Row>
                   </Col>
                   <Col span={24}>
                     <div

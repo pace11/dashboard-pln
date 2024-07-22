@@ -43,12 +43,12 @@ export default function PostsDetail({ isMobile }) {
     data: detailPost,
     fetchingData,
     isLoading,
-    useMutate,
-    isLoadingSubmit,
   } = useQueriesMutation({
     enabled: !!router?.query?.id,
     prefixUrl: `/media/${router?.query?.id}`,
   })
+
+  const { isLoadingSubmit, useMutate } = useQueriesMutation({})
 
   const showConfirmChangeStatus = ({ type }) => {
     Modal.confirm({
@@ -249,6 +249,9 @@ export default function PostsDetail({ isMobile }) {
                 type="dashed"
                 icon={<EditOutlined />}
                 onClick={() => setOpenEdit(detailPost?.data)}
+                hidden={['rejected', 'final_rejected'].includes(
+                  detailPost?.data?.status,
+                )}
               >
                 Edit
               </Button>

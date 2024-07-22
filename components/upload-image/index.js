@@ -7,6 +7,7 @@ const UploadImage = ({
   onChange,
   onBeforeUpload,
   isLoading,
+  maxLength = 1,
 }) => {
   const [previewOpen, setPreviewOpen] = useState(false)
   const [previewImage, setPreviewImage] = useState('')
@@ -36,7 +37,7 @@ const UploadImage = ({
         onChange={onChange}
         beforeUpload={onBeforeUpload}
       >
-        {fileList.length >= 1 ? null : (
+        {fileList.length >= maxLength ? null : (
           <Button
             type="button"
             icon={<PlusOutlined />}

@@ -2,6 +2,7 @@ import { COLOR } from '@/constants'
 import { ProfileContextProvider } from '@/context/profileContextProvider'
 import '@/styles/globals.css'
 import { ConfigProvider } from 'antd'
+import 'antd/dist/reset.css'
 import 'dayjs/locale/id'
 import Cookies from 'js-cookie'
 import { useEffect, useState } from 'react'
@@ -50,6 +51,12 @@ export default function App({ Component, pageProps }) {
             colorPrimary: COLOR.PRIMARY,
             colorPrimaryActive: COLOR.PRIMARY,
             colorPrimaryHover: COLOR.PRIMARY_HOVER,
+          },
+          Table: {
+            headerBg: COLOR.PRIMARY_SOFT,
+            headerSplitColor: COLOR.PRIMARY,
+            borderColor: COLOR.PRIMARY_SOFT,
+            rowHoverBg: COLOR.PRIMARY_SOFT_100,
           },
         },
       }}

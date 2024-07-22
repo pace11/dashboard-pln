@@ -353,3 +353,5 @@ export const stepProgress = ({ data = {} } = {}) => {
 
   return mapping
 }
+
+export const imagePreview = ({ data = [] }) => data?.[0]?.url ?? ''

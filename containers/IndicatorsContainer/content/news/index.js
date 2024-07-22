@@ -1,12 +1,25 @@
 /* eslint-disable react-hooks/rules-of-hooks */
+import DownloadExcelFile from '@/components/download-excel-file'
 import RoleComponentRender from '@/components/role-component-render'
 import { IMAGE_FALLBACK } from '@/constants'
+import {
+  columnsTitleListNews,
+  toExportNewsData,
+} from '@/constants/columnDownloadNews'
 import { ProfileContext } from '@/context/profileContextProvider'
-import { formatDate, labelStatus, labelYesNo, roleUser } from '@/helpers/utils'
+import {
+  formatDate,
+  imagePreview,
+  labelStatus,
+  labelYesNo,
+  roleUser,
+} from '@/helpers/utils'
 import LayoutIndicators from '@/layout/indicators'
+import { useDownloadFile } from '@/lib/hooks/useDownloadFile'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import {
   DeleteOutlined,
+  DownloadOutlined,
   EditOutlined,
   ExclamationCircleOutlined,
   EyeOutlined,
@@ -17,6 +30,8 @@ import {
 import {
   Button,
   Card,
+  DatePicker,
+  Form,
   Image,
   Modal,
   Space,
@@ -24,6 +39,7 @@ import {
   Tag,
   Typography,
 } from 'antd'
+import dayjs from 'dayjs'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { useContext, useState } from 'react'
@@ -35,6 +51,12 @@ const { Paragraph, Text } = Typography
 
 const News = ({ isMobile }) => {
   const profileUser = useContext(ProfileContext)
+  const {
+    downloadFile,
+    fileName,
+    data: dataDownload,
+    isLoading: isLoadingDownload,
+  } = useDownloadFile()
   const { data, isLoading, fetchingData, useMutate } =
     useQueriesMutation({
       prefixUrl: '/posts',
@@ -42,6 +64,7 @@ const News = ({ isMobile }) => {
   const [isOpenAdd, setOpenAdd] = useState(false)
   const [isOpenEdit, setOpenEdit] = useState(false)
   const router = useRouter()
+  const [form] = Form.useForm()
 
   const showConfirmDelete = (params) => {
     Modal.confirm({
@@ -63,13 +86,69 @@ const News = ({ isMobile }) => {
     })
   }
 
+  const showModalDownload = () => {
+    Modal.confirm({
+      title: 'Filter Download',
+      content: (
+        <Form
+          form={form}
+          name="basic"
+          labelCol={{
+            span: 24,
+          }}
+          wrapperCol={{
+            span: 24,
+          }}
+          initialValues={{
+            remember: true,
+          }}
+          autoComplete="off"
+          labelAlign="left"
+        >
+          <Form.Item label="Date Range" name="date_range">
+            <DatePicker.RangePicker />
+          </Form.Item>
+        </Form>
+      ),
+      icon: <ExclamationCircleOutlined />,
+      okText: 'Download',
+      cancelText: 'No',
+      onOk: async () => {
+        const date = form.getFieldValue('date_range')
+        const start_date = date?.[0]
+          ? dayjs(new Date(date?.[0]))
+              .locale('id')
+              .format('YYYY-MM-DD')
+          : ''
+        const end_date = date?.[1]
+          ? dayjs(new Date(date?.[1]))
+              .locale('id')
+              .format('YYYY-MM-DD')
+          : ''
+
+        downloadFile({
+          prefixUrl: '/posts/download',
+          fileName: 'Data News',
+          mappingData: [{ columns: columnsTitleListNews }],
+          exportDownload: toExportNewsData,
+          params: { start_date, end_date },
+        })
+
+        form.resetFields()
+      },
+      onCancel: () => {
+        form.resetFields()
+      },
+    })
+  }
+
   const columns = [
     {
       title: 'Thumbnails',
       render: ({ thumbnail }) => (
         <Image
-          src={`${process.env.NEXT_PUBLIC_PATH_IMAGE}/${thumbnail}`}
-          alt={thumbnail}
+          src={imagePreview({ data: JSON.parse(thumbnail) })}
+          alt={imagePreview({ data: JSON.parse(thumbnail) })}
           fallback={IMAGE_FALLBACK}
         />
       ),
@@ -143,6 +222,9 @@ const News = ({ isMobile }) => {
               type="dashed"
               icon={<EditOutlined />}
               onClick={() => setOpenEdit(item)}
+              hidden={['rejected', 'final_rejected'].includes(
+                item?.status,
+              )}
             >
               Edit
             </Button>
@@ -169,6 +251,9 @@ const News = ({ isMobile }) => {
               type="primary"
               icon={<DeleteOutlined />}
               onClick={() => showConfirmDelete(item)}
+              hidden={['rejected', 'final_rejected'].includes(
+                item?.status,
+              )}
             >
               Delete
             </Button>
@@ -180,6 +265,14 @@ const News = ({ isMobile }) => {
 
   const extraDesktop = [
     <Space key="descktop-action-pegawai">
+      <Button
+        type="dashed"
+        icon={<DownloadOutlined />}
+        loading={isLoadingDownload}
+        onClick={() => showModalDownload()}
+      >
+        Download
+      </Button>
       <Button
         icon={<ReloadOutlined />}
         onClick={() => fetchingData({ prefixUrl: '/posts' })}
@@ -206,6 +299,12 @@ const News = ({ isMobile }) => {
 
   return (
     <LayoutIndicators>
+      {!!fileName && (
+        <DownloadExcelFile
+          fileName={fileName}
+          dataDownload={dataDownload}
+        />
+      )}
       <Card bordered={false} extra={extraDesktop}>
         <Table
           rowKey="key"

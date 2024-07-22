@@ -50,6 +50,8 @@ module.exports = {
   },
   COLOR: {
     PRIMARY: '#1c94ad',
-    PRIMARY_HOVER: '#125f6f'
+    PRIMARY_HOVER: '#125f6f',
+    PRIMARY_SOFT: '#e6f4ff',
+    PRIMARY_SOFT_100: '#f4f9fd',
   },
 }

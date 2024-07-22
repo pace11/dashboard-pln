@@ -26,12 +26,12 @@ import { useState } from 'react'
 const Add = dynamic(() => import('./drawer/add'))
 const Edit = dynamic(() => import('./drawer/edit'))
 
-const User = ({ isMobile }) => {
+const UserDetail = ({ isMobile }) => {
   const router = useRouter()
   const { id } = router.query
   const { data, isLoading, fetchingData, useMutate } =
     useQueriesMutation({
-      prefixUrl: '/users',
+      prefixUrl: `/users?placement=${id}`,
     })
 
   const [isOpenAdd, setOpenAdd] = useState(false)
@@ -50,7 +50,7 @@ const User = ({ isMobile }) => {
           method: 'DELETE',
         })
         if (response?.success) {
-          fetchingData({ prefixUrl: '/users' })
+          fetchingData({ prefixUrl: `/users?placement=${id}` })
         }
       },
       onCancel: () => {},
@@ -117,7 +117,9 @@ const User = ({ isMobile }) => {
     <Space key="action-list-user">
       <Button
         icon={<ReloadOutlined />}
-        onClick={() => fetchingData({ prefixUrl: '/users' })}
+        onClick={() =>
+          fetchingData({ prefixUrl: `/users?placement=${id}` })
+        }
       >
         Reload Data
       </Button>
@@ -196,4 +198,4 @@ const User = ({ isMobile }) => {
   )
 }
 
-export default User
+export default UserDetail

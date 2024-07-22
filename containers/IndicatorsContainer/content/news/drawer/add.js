@@ -5,6 +5,7 @@ import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import {
   CloseOutlined,
   ExclamationCircleOutlined,
+  InfoCircleOutlined,
   SaveOutlined,
 } from '@ant-design/icons'
 import {
@@ -48,7 +49,7 @@ export default function Add({ isMobile, onClose, isOpenAdd }) {
     const payload = {
       title: values?.title || '',
       description: values?.description || '',
-      thumbnail: fileList?.[0]?.name || '',
+      thumbnail: fileList?.length > 0 ? JSON.stringify(fileList) : '',
       posted: values?.posted || false,
       banner: values?.banner || false,
       categories_id: values?.categories_id || '',
@@ -94,14 +95,6 @@ export default function Add({ isMobile, onClose, isOpenAdd }) {
   }
 
   const HandleBeforeUpload = async (file) => {
-    setFileList([
-      {
-        uid: '1',
-        percent: 35,
-        name: 'upload.png',
-        status: 'uploading',
-      },
-    ])
     const formData = new FormData()
     formData.append('file', file)
     const response = await useMutate({
@@ -110,12 +103,13 @@ export default function Add({ isMobile, onClose, isOpenAdd }) {
       payload: formData,
     })
     if (response?.success) {
-      setFileList([
+      setFileList((oldArray) => [
+        ...oldArray,
         {
-          uid: '1',
+          uid: oldArray.length + 1,
           name: `${response?.data?.image}`,
           status: 'done',
-          url: `${process.env.NEXT_PUBLIC_PATH_IMAGE}/${response?.data?.image}`,
+          url: `${response?.data?.image}`,
         },
       ])
     } else {
@@ -188,11 +182,20 @@ export default function Add({ isMobile, onClose, isOpenAdd }) {
         </Form.Item>
         <Row gutter={16}>
           <Col span={10}>
-            <Form.Item label="Thumbnail" name="thumbnail">
+            <Form.Item
+              label="Image"
+              name="thumbnail"
+              tooltip={{
+                title:
+                  'Maks 5 image, image pertama akan menjadi thumbnails',
+                icon: <InfoCircleOutlined />,
+              }}
+            >
               <UploadImage
                 fileList={fileList}
                 onChange={HandleChangeUpload}
                 onBeforeUpload={HandleBeforeUpload}
+                maxLength={5}
               />
             </Form.Item>
           </Col>

@@ -1,10 +1,11 @@
+import { COLOR } from '@/constants'
 import { ProfileContext } from '@/context/profileContextProvider'
 import {
   DatabaseOutlined,
   LogoutOutlined,
   NotificationOutlined,
   ThunderboltOutlined,
-  UserOutlined
+  UserOutlined,
 } from '@ant-design/icons'
 import {
   Badge,
@@ -55,15 +56,15 @@ const LayoutApp = ({ children, isMobile }) => {
   }
 
   const onMenuClick = ({ key }) => {
-    const path = {
-      logout: '/logout',
-      trash: '/trash',
-      notifications: '/notifications',
-    }
-    router.push({ pathname: path[key] })
+    router.push({ pathname: `/${key}` })
   }
 
   const items = ({ role = '' }) => [
+    // {
+    //   key: 'profile',
+    //   label: 'Profile',
+    //   icon: <UserOutlined />,
+    // },
     {
       key: 'notifications',
       label: <Badge dot>Notifications</Badge>,
@@ -110,6 +111,8 @@ const LayoutApp = ({ children, isMobile }) => {
     setActiveKey(arrRouter !== '/' ? `${arrRouter.toString()}` : '/')
   }, [router.asPath])
 
+  console.log('router => ', router)
+
   return (
     <>
       <Head>
@@ -152,10 +155,13 @@ const LayoutApp = ({ children, isMobile }) => {
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '0 15px',
-              background: '#1c94ad',
+              background: COLOR.PRIMARY,
             }}
           >
-            <Title style={{ margin: 0, padding: 0, color: 'white' }} level={5}>
+            <Title
+              style={{ margin: 0, padding: 0, color: 'white' }}
+              level={5}
+            >
               <DatabaseOutlined /> DASHBOARD PLN
             </Title>
             <Row>

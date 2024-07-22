@@ -122,6 +122,7 @@ const Media = ({ isMobile }) => {
               type="dashed"
               icon={<EditOutlined />}
               onClick={() => setOpenEdit(item)}
+              hidden={['rejected', 'final_rejected'].includes(item?.status)}
             >
               Edit
             </Button>
@@ -148,6 +149,7 @@ const Media = ({ isMobile }) => {
               type="primary"
               icon={<DeleteOutlined />}
               onClick={() => showConfirmDelete(item)}
+              hidden={['rejected', 'final_rejected'].includes(item?.status)}
             >
               Delete
             </Button>
