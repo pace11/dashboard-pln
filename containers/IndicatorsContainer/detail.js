@@ -3,10 +3,24 @@ import { useRouter } from 'next/router'
 
 const News = dynamic(() => import('./content/news/detail'))
 const Media = dynamic(() => import('./content/media/detail'))
+const AccountInfluencer = dynamic(() =>
+  import('./content/pengelolaan-akun-influencer/detail'),
+)
+const InternalComm = dynamic(() =>
+  import('./content/pengelolaan-komunikasi-internal/detail'),
+)
+const Scoring = dynamic(() => import('./content/scoring/detail'))
+const InformasiPublic = dynamic(() =>
+  import('./content/pengelolaan-informasi-public/detail'),
+)
 
 const templates = {
   news: News,
   media: Media,
+  'pengelolaan-akun-influencer': AccountInfluencer,
+  'pengelolaan-komunikasi-internal': InternalComm,
+  scoring: Scoring,
+  'pengelolaan-informasi-public': InformasiPublic,
 }
 
 const IndicatorsContainerDetail = () => {

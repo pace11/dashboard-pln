@@ -1,4 +1,4 @@
-import { PlusOutlined } from '@ant-design/icons'
+import { PlusOutlined, UploadOutlined } from '@ant-design/icons'
 import { Button, Image, Upload } from 'antd'
 import { useState } from 'react'
 
@@ -8,6 +8,8 @@ const UploadImage = ({
   onBeforeUpload,
   isLoading,
   maxLength = 1,
+  disabled = false,
+  type = 'picture-card',
 }) => {
   const [previewOpen, setPreviewOpen] = useState(false)
   const [previewImage, setPreviewImage] = useState('')
@@ -31,18 +33,28 @@ const UploadImage = ({
   return (
     <>
       <Upload
-        listType="picture-card"
+        listType={type}
         fileList={fileList}
-        onPreview={handlePreview}
+        onPreview={type === 'picture-card' ? handlePreview : false}
         onChange={onChange}
         beforeUpload={onBeforeUpload}
+        disabled={disabled}
       >
         {fileList.length >= maxLength ? null : (
           <Button
-            type="button"
-            icon={<PlusOutlined />}
+            type={type === 'picture-card' ? 'button' : 'default'}
+            icon={
+              type === 'picture-card' ? (
+                <PlusOutlined />
+              ) : (
+                <UploadOutlined />
+              )
+            }
             loading={isLoading}
-          />
+            hidden={disabled}
+          >
+            {`${type === 'picture-card' ? '' : 'Upload file'}`}
+          </Button>
         )}
       </Upload>
       {previewImage && (

@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import RoleComponentRender from '@/components/role-component-render'
 import { ProfileContext } from '@/context/profileContextProvider'
-import { formatDate, labelStatus, roleUser } from '@/helpers/utils'
+import { formatDate } from '@/helpers/utils'
 import LayoutIndicators from '@/layout/indicators'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import {
@@ -9,29 +9,29 @@ import {
   EditOutlined,
   ExclamationCircleOutlined,
   EyeOutlined,
-  LinkOutlined,
   PlusOutlined,
   ReloadOutlined,
 } from '@ant-design/icons'
 import { Button, Card, Modal, Space, Table, Typography } from 'antd'
+import dayjs from 'dayjs'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { useContext, useState } from 'react'
 
-const Add = dynamic(() => import('./drawer/add'))
-const Edit = dynamic(() => import('./drawer/edit'))
+const Add = dynamic(() => import('../media/drawer/add'))
+const Edit = dynamic(() => import('../media/drawer/edit'))
 
 const { Paragraph, Text } = Typography
 
 const Media = ({ isMobile }) => {
+  const router = useRouter()
   const profileUser = useContext(ProfileContext)
-  const { data, isLoading, fetchingData, useMutate } =
-    useQueriesMutation({
-      prefixUrl: '/media',
-    })
+  const { useMutate } = useQueriesMutation({})
+  const { data, isLoading, fetchingData } = useQueriesMutation({
+    prefixUrl: `/${router?.query?.slug}`,
+  })
   const [isOpenAdd, setOpenAdd] = useState(false)
   const [isOpenEdit, setOpenEdit] = useState(false)
-  const router = useRouter()
 
   const showConfirmDelete = (params) => {
     Modal.confirm({
@@ -42,11 +42,11 @@ const Media = ({ isMobile }) => {
       cancelText: 'No',
       onOk: async () => {
         const response = await useMutate({
-          prefixUrl: `/media/${params?.id}`,
+          prefixUrl: `/link/${params?.id}`,
           method: 'DELETE',
         })
         if (response?.success) {
-          fetchingData({ prefixUrl: '/media' })
+          fetchingData({ prefixUrl: `/${router?.query?.slug}` })
         }
       },
       onCancel: () => {},
@@ -55,49 +55,18 @@ const Media = ({ isMobile }) => {
 
   const columns = [
     {
-      title: 'Title',
-      render: ({ title }) => <Paragraph>{title}</Paragraph>,
-    },
-    {
-      title: 'Url',
-      width: 300,
-      render: ({ url }) => (
-        <Space direction="vertical">
-          <Paragraph>{url}</Paragraph>
-          <Button
-            icon={<LinkOutlined />}
-            type="dashed"
-            onClick={() => window.open(url, '_blank')}
-            size="small"
-          >
-            Open Url
-          </Button>
-        </Space>
+      title: 'Period Date',
+      render: ({ period_date }) => (
+        <Paragraph>
+          {dayjs(new Date(period_date))
+            .locale('id')
+            .format('YYYY MMMM')}
+        </Paragraph>
       ),
     },
     {
-      title: 'Caption',
-      render: ({ caption }) => (
-        <Paragraph ellipsis={{ rows: 3 }}>{caption}</Paragraph>
-      ),
-    },
-    {
-      title: 'Target Post',
-      render: ({ target_post }) => <Text>{target_post}</Text>,
-    },
-    {
-      title: 'Status',
-      key: 'status',
-      dataIndex: 'status',
-      render: (status) => labelStatus(status)?.tag,
-    },
-    {
-      title: 'Created By',
-      render: ({ user }) => (
-        <Space>
-          <Text>{user?.email}</Text>
-        </Space>
-      ),
+      title: 'Target',
+      render: ({ target }) => <Text>{target}</Text>,
     },
     {
       title: 'Created At',
@@ -106,42 +75,44 @@ const Media = ({ isMobile }) => {
       render: (created_at) => formatDate(created_at),
     },
     {
+      title: 'Updated At',
+      key: 'updated_at',
+      dataIndex: 'updated_at',
+      render: (updated_at) => formatDate(updated_at),
+    },
+    {
       title: 'Aksi',
       fixed: 'right',
       render: (item) => (
-        <Space direction="vertical">
+        <Space>
           <RoleComponentRender
             condition={
-              !!item?.is_own_post ||
-              !!item?.is_superadmin ||
-              !!item?.is_checker ||
-              !!item?.is_approver
+              profileUser?.placement === 'main_office' &&
+              profileUser?.type === 'creator'
             }
           >
             <Button
               type="dashed"
               icon={<EditOutlined />}
               onClick={() => setOpenEdit(item)}
-              hidden={['rejected', 'final_rejected'].includes(item?.status)}
             >
               Edit
             </Button>
           </RoleComponentRender>
           <Button
-            type="dashed"
             icon={<EyeOutlined />}
             onClick={() =>
-              router.push(`/indicators/media/${item?.id}`)
+              router.push(
+                `/indicators/${router?.query?.slug}/${item?.id}`,
+              )
             }
           >
             Detail
           </Button>
           <RoleComponentRender
             condition={
-              !!item?.is_own_post ||
-              !!item?.is_superadmin ||
-              !!item?.is_checker ||
-              !!item?.is_approver
+              profileUser?.placement === 'main_office' &&
+              profileUser?.type === 'creator'
             }
           >
             <Button
@@ -149,7 +120,7 @@ const Media = ({ isMobile }) => {
               type="primary"
               icon={<DeleteOutlined />}
               onClick={() => showConfirmDelete(item)}
-              hidden={['rejected', 'final_rejected'].includes(item?.status)}
+              hidden
             >
               Delete
             </Button>
@@ -163,14 +134,17 @@ const Media = ({ isMobile }) => {
     <Space key="descktop-action-pegawai">
       <Button
         icon={<ReloadOutlined />}
-        onClick={() => fetchingData({ prefixUrl: '/media' })}
+        onClick={() =>
+          fetchingData({ prefixUrl: `/${router?.query?.slug}` })
+        }
       >
         Reload Data
       </Button>
       <RoleComponentRender
-        condition={['creator', 'superadmin'].includes(
-          roleUser({ user: profileUser }),
-        )}
+        condition={
+          profileUser?.placement === 'main_office' &&
+          profileUser?.type === 'creator'
+        }
       >
         <Button
           type="primary"
@@ -179,7 +153,7 @@ const Media = ({ isMobile }) => {
             setOpenAdd(true)
           }}
         >
-          Add Media
+          Add New
         </Button>
       </RoleComponentRender>
     </Space>,
@@ -194,7 +168,7 @@ const Media = ({ isMobile }) => {
           columns={columns}
           loading={isLoading}
           style={{ width: '100%' }}
-          scroll={{ x: 1300, y: '50vh' }}
+          scroll={{ y: '50vh' }}
           pagination={{
             total: data?.pagination?.total,
             current: data?.pagination?.currentPage,
@@ -203,7 +177,9 @@ const Media = ({ isMobile }) => {
             hideOnSinglePage: true,
             showTotal: (total) => `${total} Data`,
             onChange: (page) =>
-              fetchingData({ prefixUrl: `/media?page=${page}` }),
+              fetchingData({
+                prefixUrl: `/${router?.query?.slug}?page=${page}`,
+              }),
           }}
           size="small"
         />
@@ -214,7 +190,7 @@ const Media = ({ isMobile }) => {
             onClose={() => {
               setOpenAdd(false)
               Modal.destroyAll()
-              fetchingData({ prefixUrl: '/media' })
+              fetchingData({ prefixUrl: `/${router?.query?.slug}` })
             }}
           />
         )}
@@ -225,7 +201,7 @@ const Media = ({ isMobile }) => {
             onClose={() => {
               setOpenEdit(false)
               Modal.destroyAll()
-              fetchingData({ prefixUrl: `/media` })
+              fetchingData({ prefixUrl: `/${router?.query?.slug}` })
             }}
           />
         )}

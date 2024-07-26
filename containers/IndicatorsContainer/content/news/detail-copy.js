@@ -2,15 +2,7 @@
 import RoleComponentRender from '@/components/role-component-render'
 import { IMAGE_FALLBACK, KEY_STEP } from '@/constants'
 import { ProfileContext } from '@/context/profileContextProvider'
-import {
-  approvedStatus,
-  checkConditionApprovedRejected,
-  checkConditionEdit,
-  checkConditionRecreate,
-  labelYesNo,
-  rejectedStatus,
-  stepProgress,
-} from '@/helpers/utils'
+import { labelYesNo, stepProgress } from '@/helpers/utils'
 import LayoutIndicators from '@/layout/indicators'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import {
@@ -84,11 +76,7 @@ export default function PostsDetail({ isMobile }) {
           <Form.Item label="Remarks" name="remarks">
             <Input.TextArea size="large" placeholder="Remarks ..." />
           </Form.Item>
-          {[
-            'final_checked',
-            'final_approved',
-            'final_approved_2',
-          ].includes(detailPost?.data?.status) &&
+          {detailPost?.data?.status === 'final_checked' &&
             type !== 'rejected' && (
               <Form.Item label="Posted" name="posted">
                 <Switch />
@@ -128,7 +116,7 @@ export default function PostsDetail({ isMobile }) {
         const response = await useMutate({
           prefixUrl: `/post/recreate/${id}`,
         })
-
+        
         if (response?.success) {
           router.push(`/indicators/news/`)
         }
@@ -145,28 +133,9 @@ export default function PostsDetail({ isMobile }) {
           <Space key="action-posts-detail">
             <RoleComponentRender
               condition={
-                !!detailPost?.data?.is_creator &&
-                ['approved'].includes(detailPost?.data?.status)
-              }
-            >
-              <Button
-                icon={<FileSearchOutlined />}
-                type="primary"
-                loading={isLoadingSubmit}
-                onClick={() => {
-                  showConfirmChangeStatus({ type: 'checked' })
-                  formStatus.setFieldsValue({
-                    status: 'final_created',
-                  })
-                }}
-              >
-                Done Checking By Creator Induk
-              </Button>
-            </RoleComponentRender>
-            <RoleComponentRender
-              condition={
-                !!detailPost?.data?.is_checker &&
-                ['created', 'final_created'].includes(
+                (!!detailPost?.data?.is_checker ||
+                  !!detailPost?.data?.is_superadmin) &&
+                ['created', 'final_created', 'approved'].includes(
                   detailPost?.data?.status,
                 )
               }
@@ -185,13 +154,17 @@ export default function PostsDetail({ isMobile }) {
                   })
                 }}
               >
-                Done Checking by Checker
+                Checked Post
               </Button>
             </RoleComponentRender>
             <RoleComponentRender
-              condition={checkConditionApprovedRejected({
-                data: detailPost?.data ?? {},
-              })}
+              condition={
+                (!!detailPost?.data?.is_approver ||
+                  !!detailPost?.data?.is_superadmin) &&
+                ['checked', 'final_checked'].includes(
+                  detailPost?.data?.status,
+                )
+              }
             >
               <Button
                 icon={<FileDoneOutlined />}
@@ -200,19 +173,24 @@ export default function PostsDetail({ isMobile }) {
                 onClick={() => {
                   showConfirmChangeStatus({ type: 'approved' })
                   formStatus.setFieldsValue({
-                    status: approvedStatus({
-                      status: detailPost?.data?.status ?? '',
-                    }),
+                    status:
+                      profileUser?.placement === 'main_office'
+                        ? 'final_approved'
+                        : 'approved',
                   })
                 }}
               >
-                Approved
+                Approved Post
               </Button>
             </RoleComponentRender>
             <RoleComponentRender
-              condition={checkConditionApprovedRejected({
-                data: detailPost?.data ?? {},
-              })}
+              condition={
+                (!!detailPost?.data?.is_approver ||
+                  !!detailPost?.data?.is_superadmin) &&
+                ['checked', 'final_checked'].includes(
+                  detailPost?.data?.status,
+                )
+              }
             >
               <Button
                 icon={<FileExclamationOutlined />}
@@ -222,32 +200,43 @@ export default function PostsDetail({ isMobile }) {
                 onClick={() => {
                   showConfirmChangeStatus({ type: 'rejected' })
                   formStatus.setFieldsValue({
-                    status: rejectedStatus({
-                      status: detailPost?.data?.status ?? '',
-                    }),
+                    status:
+                      profileUser?.placement === 'main_office'
+                        ? 'final_rejected'
+                        : 'rejected',
                   })
                 }}
               >
-                Rejected
+                Rejected Post
               </Button>
             </RoleComponentRender>
             <RoleComponentRender
-              condition={checkConditionEdit({
-                data: detailPost?.data ?? {},
-              })}
+              condition={
+                !!detailPost?.data?.is_own_post ||
+                !!detailPost?.data?.is_superadmin ||
+                !!detailPost?.data?.is_checker ||
+                !!detailPost?.data?.is_approver
+              }
             >
               <Button
                 type="dashed"
                 icon={<EditOutlined />}
                 onClick={() => setOpenEdit(detailPost?.data)}
+                hidden={['rejected', 'final_rejected'].includes(
+                  detailPost?.data?.status,
+                )}
               >
                 Edit
               </Button>
             </RoleComponentRender>
             <RoleComponentRender
-              condition={checkConditionRecreate({
-                data: detailPost?.data,
-              })}
+              condition={
+                !!detailPost?.data?.is_own_post &&
+                !detailPost?.data?.recreated &&
+                ['rejected', 'final_rejected'].includes(
+                  detailPost?.data?.status,
+                )
+              }
             >
               <Button
                 type="primary"
@@ -359,12 +348,9 @@ export default function PostsDetail({ isMobile }) {
                     size="small"
                     current={KEY_STEP?.[detailPost?.data?.status]}
                     status={
-                      [
-                        'rejected',
-                        'final_rejected',
-                        'final_rejected_2',
-                        'final_rejected_3',
-                      ].includes(detailPost?.data?.status)
+                      ['rejected', 'final_rejected'].includes(
+                        detailPost?.data?.status,
+                      )
                         ? 'error'
                         : 'finish'
                     }

@@ -1,31 +1,37 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
+import { CloseOutlined, SaveOutlined } from '@ant-design/icons'
 import {
-  CloseOutlined,
-  ExclamationCircleOutlined,
-  SaveOutlined,
-} from '@ant-design/icons'
-import { Button, Drawer, Form, Input, Modal, Space } from 'antd'
-import { useRef, useState } from 'react'
+  Button,
+  DatePicker,
+  Drawer,
+  Form,
+  InputNumber,
+  Space,
+} from 'antd'
+import dayjs from 'dayjs'
+import { useRouter } from 'next/router'
+import { useRef } from 'react'
 
 export default function Add({ isMobile, onClose, isOpenAdd }) {
+  const router = useRouter()
   const { useMutate, isLoadingSubmit } = useQueriesMutation({})
   const refButton = useRef(null)
   const [form] = Form.useForm()
-  const [isEditing, setEditing] = useState(false)
 
   const onSubmitClick = () => {
-    // `current` points to the mounted text input element
     refButton.current.click()
   }
 
   const onFinish = async (values) => {
-    const payload = {
-      ...values,
-      key: 'indicator-4',
-    }
+    const payload = { ...values }
+    payload.period_date = dayjs(
+      new Date(payload?.period_date),
+    ).format('YYYY')
+    payload.target = payload?.target ?? 0
+
     const response = await useMutate({
-      prefixUrl: '/link',
+      prefixUrl: `/${router?.query?.slug}`,
       payload,
     })
     if (response?.success) {
@@ -35,36 +41,14 @@ export default function Add({ isMobile, onClose, isOpenAdd }) {
   }
 
   const showConfirmClose = () => {
-    if (isEditing) {
-      Modal.confirm({
-        title: 'Close Confirm',
-        content: (
-          <p>
-            Are you sure you want to leave this form? Previous data
-            will not be saved ?
-          </p>
-        ),
-        icon: <ExclamationCircleOutlined />,
-        okText: 'Yes',
-        cancelText: 'No',
-        onOk: () => {
-          onClose()
-          form.resetFields()
-          setEditing(false)
-        },
-        onCancel: () => {},
-      })
-    } else {
-      onClose()
-      form.resetFields()
-      setEditing(false)
-    }
+    onClose()
+    form.resetFields()
   }
 
   return (
     <Drawer
-      title={isMobile ? false : 'Add Post'}
-      width={isMobile ? '100%' : 900}
+      title={isMobile ? false : 'Add'}
+      width={isMobile ? '100%' : 600}
       placement={isMobile ? 'bottom' : 'right'}
       onClose={showConfirmClose}
       open={isOpenAdd}
@@ -95,7 +79,7 @@ export default function Add({ isMobile, onClose, isOpenAdd }) {
           span: 24,
         }}
         wrapperCol={{
-          span: 24,
+          span: 8,
         }}
         initialValues={{
           remember: true,
@@ -104,25 +88,30 @@ export default function Add({ isMobile, onClose, isOpenAdd }) {
         // onFinishFailed={onFinishFailed}
         onFinish={onFinish}
         labelAlign="left"
-        onValuesChange={(value) => setEditing(!!value)}
       >
         <Form.Item
-          label="Url"
-          name="url"
+          label="Year"
+          name="period_date"
           rules={[
             {
               required: true,
-              message: 'please enter url!',
+              message: 'please select year!',
             },
           ]}
         >
-          <Input.TextArea
+          <DatePicker
             size="large"
-            placeholder="Url example: https://drive.google.com/drive/..."
+            picker="year"
+            style={{ width: '100%' }}
           />
         </Form.Item>
-        <Form.Item label="Periode" name="period">
-          <Input rows={6} size="large" placeholder="Periode ..." />
+        <Form.Item label="Target" name="target">
+          <InputNumber
+            min={0}
+            size="large"
+            placeholder="Target ..."
+            style={{ width: '100%' }}
+          />
         </Form.Item>
         <Form.Item hidden>
           <Button ref={refButton} type="primary" htmlType="submit">

@@ -1,38 +1,37 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
-import {
-  CloseOutlined,
-  ExclamationCircleOutlined,
-  SaveOutlined,
-} from '@ant-design/icons'
+import { CloseOutlined, SaveOutlined } from '@ant-design/icons'
 import {
   Button,
   Drawer,
   Form,
-  Input,
-  Modal,
-  Space,
-  Switch,
+  InputNumber,
+  Space
 } from 'antd'
-import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/router'
+import { useEffect, useRef } from 'react'
 
 export default function Edit({ isMobile, onClose, isOpen }) {
+  const router = useRouter()
   const { useMutate, isLoadingSubmit } = useQueriesMutation({})
   const refButton = useRef(null)
   const [form] = Form.useForm()
-  const [isEditing, setEditing] = useState(false)
 
   const onSubmitClick = () => {
-    // `current` points to the mounted text input element
     refButton.current.click()
   }
 
   const onFinish = async (values) => {
+    const payload = {
+      target: values?.target ?? 0,
+    }
+
     const response = await useMutate({
-      prefixUrl: `/link/${isOpen?.id}`,
+      prefixUrl: `/${router?.query?.slug}/${isOpen?.id}`,
       method: 'PATCH',
-      payload: values,
+      payload,
     })
+
     if (response?.success) {
       onClose()
       form.resetFields()
@@ -40,51 +39,25 @@ export default function Edit({ isMobile, onClose, isOpen }) {
   }
 
   const showConfirmClose = () => {
-    if (isEditing) {
-      Modal.confirm({
-        title: 'Close Confirm',
-        content: (
-          <p>
-            Are you sure you want to leave this form? Previous data
-            will not be saved ?
-          </p>
-        ),
-        icon: <ExclamationCircleOutlined />,
-        okText: 'Yes',
-        cancelText: 'No',
-        onOk: () => {
-          onClose()
-          form.resetFields()
-          setEditing(false)
-        },
-        onCancel: () => {},
-      })
-    } else {
-      onClose()
-      form.resetFields()
-      setEditing(false)
-    }
+    onClose()
+    form.resetFields()
   }
 
   useEffect(() => {
     if (!!isOpen) {
       form.setFieldsValue({
-        key: isOpen?.key || '',
-        url: isOpen?.url || '',
-        period: isOpen?.period || '',
-        active: isOpen?.active || false,
+        target: isOpen?.target ?? 0,
       })
     }
   }, [isOpen, form])
 
   return (
     <Drawer
-      title={isMobile ? false : 'Edit Post'}
-      width={isMobile ? '100%' : 900}
+      title={isMobile ? false : 'Edit'}
+      width={isMobile ? '100%' : 600}
       placement={isMobile ? 'bottom' : 'right'}
       onClose={showConfirmClose}
       open={isOpen}
-      bodyStyle={{ paddingBottom: 80 }}
       extra={
         <Space>
           <Button
@@ -112,7 +85,7 @@ export default function Edit({ isMobile, onClose, isOpen }) {
           span: 24,
         }}
         wrapperCol={{
-          span: 24,
+          span: 8,
         }}
         initialValues={{
           remember: true,
@@ -121,31 +94,14 @@ export default function Edit({ isMobile, onClose, isOpen }) {
         // onFinishFailed={onFinishFailed}
         onFinish={onFinish}
         labelAlign="left"
-        onValuesChange={(value) => setEditing(!!value)}
       >
-        <Form.Item hidden label="Key" name="key">
-          <Input size="large" />
-        </Form.Item>
-        <Form.Item
-          label="Url"
-          name="url"
-          rules={[
-            {
-              required: true,
-              message: 'please enter url!',
-            },
-          ]}
-        >
-          <Input.TextArea
+        <Form.Item label="Target" name="target">
+          <InputNumber
+            min={0}
             size="large"
-            placeholder="Url example: https://drive.google.com/drive/..."
+            placeholder="Target ..."
+            style={{ width: '100%' }}
           />
-        </Form.Item>
-        <Form.Item label="Periode" name="period">
-          <Input rows={6} size="large" placeholder="Periode ..." />
-        </Form.Item>
-        <Form.Item label="Active" name="active">
-          <Switch />
         </Form.Item>
         <Form.Item hidden>
           <Button ref={refButton} type="primary" htmlType="submit">

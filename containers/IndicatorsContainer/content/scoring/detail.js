@@ -5,6 +5,7 @@ import { formatDate } from '@/helpers/utils'
 import LayoutIndicators from '@/layout/indicators'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import {
+  ArrowLeftOutlined,
   DeleteOutlined,
   EditOutlined,
   ExclamationCircleOutlined,
@@ -12,23 +13,38 @@ import {
   PlusOutlined,
   ReloadOutlined,
 } from '@ant-design/icons'
-import { Button, Card, Modal, Space, Table, Typography } from 'antd'
+import {
+  Button,
+  Card,
+  Col,
+  Descriptions,
+  Modal,
+  Row,
+  Space,
+  Table,
+  Typography,
+} from 'antd'
 import dayjs from 'dayjs'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { useContext, useState } from 'react'
 
-const Add = dynamic(() => import('./drawer/add'))
-const Edit = dynamic(() => import('./drawer/edit'))
+const Add = dynamic(() => import('./drawer/add-child'))
+const Edit = dynamic(() => import('./drawer/edit-child'))
 
 const { Paragraph, Text } = Typography
 
-const PengelolaAkunInfluencer = ({ isMobile }) => {
+const PengelolaAkunInfluencerDetail = ({ isMobile }) => {
   const router = useRouter()
   const profileUser = useContext(ProfileContext)
   const { useMutate } = useQueriesMutation({})
+  const { data: detail } = useQueriesMutation({
+    enabled: !!router?.query?.id,
+    prefixUrl: `/${router?.query?.slug}/${router?.query?.id}`,
+  })
   const { data, isLoading, fetchingData } = useQueriesMutation({
-    prefixUrl: `/${router?.query?.slug}`,
+    enabled: !!router?.query?.id,
+    prefixUrl: `/${router?.query?.slug}-item/parent/${router?.query?.id}`,
   })
   const [isOpenAdd, setOpenAdd] = useState(false)
   const [isOpenEdit, setOpenEdit] = useState(false)
@@ -42,11 +58,13 @@ const PengelolaAkunInfluencer = ({ isMobile }) => {
       cancelText: 'No',
       onOk: async () => {
         const response = await useMutate({
-          prefixUrl: `/link/${params?.id}`,
+          prefixUrl: `/${router?.query?.slug}-item/${params?.id}`,
           method: 'DELETE',
         })
         if (response?.success) {
-          fetchingData({ prefixUrl: `/${router?.query?.slug}` })
+          fetchingData({
+            prefixUrl: `/${router?.query?.slug}-item/parent/${router?.query?.id}`,
+          })
         }
       },
       onCancel: () => {},
@@ -55,14 +73,16 @@ const PengelolaAkunInfluencer = ({ isMobile }) => {
 
   const columns = [
     {
-      title: 'Period Date',
-      render: ({ period_date }) => (
-        <Paragraph>
-          {dayjs(new Date(period_date))
-            .locale('id')
-            .format('YYYY MMMM')}
-        </Paragraph>
-      ),
+      title: 'Unit',
+      render: (item) => <Text>{item?.unit?.title}</Text>,
+    },
+    {
+      title: 'Realization',
+      render: ({ realization }) => <Text>{realization}</Text>,
+    },
+    {
+      title: 'Percentage',
+      render: ({ value }) => <Text>{value ? `${value}%` : '0'}</Text>,
     },
     {
       title: 'Created At',
@@ -80,10 +100,10 @@ const PengelolaAkunInfluencer = ({ isMobile }) => {
       title: 'Aksi',
       fixed: 'right',
       render: (item) => (
-        <Space>
+        <Space direction="vertical">
           <RoleComponentRender
             condition={
-              profileUser?.placement === 'main_office' &&
+              profileUser?.placement === 'executor_unit' &&
               profileUser?.type === 'creator'
             }
           >
@@ -91,24 +111,20 @@ const PengelolaAkunInfluencer = ({ isMobile }) => {
               type="dashed"
               icon={<EditOutlined />}
               onClick={() => setOpenEdit(item)}
-              hidden
             >
               Edit
             </Button>
           </RoleComponentRender>
           <Button
+            type="dashed"
             icon={<EyeOutlined />}
-            onClick={() =>
-              router.push(
-                `/indicators/${router?.query?.slug}/${item?.id}`,
-              )
-            }
+            onClick={() => setOpenEdit({ ...item, isViewOnly: true })}
           >
-            Detail
+            View
           </Button>
           <RoleComponentRender
             condition={
-              profileUser?.placement === 'main_office' &&
+              profileUser?.placement === 'executor_unit' &&
               profileUser?.type === 'creator'
             }
           >
@@ -117,7 +133,6 @@ const PengelolaAkunInfluencer = ({ isMobile }) => {
               type="primary"
               icon={<DeleteOutlined />}
               onClick={() => showConfirmDelete(item)}
-              hidden
             >
               Delete
             </Button>
@@ -132,14 +147,16 @@ const PengelolaAkunInfluencer = ({ isMobile }) => {
       <Button
         icon={<ReloadOutlined />}
         onClick={() =>
-          fetchingData({ prefixUrl: `/${router?.query?.slug}` })
+          fetchingData({
+            prefixUrl: `/${router?.query?.slug}-item/parent/${router?.query?.id}`,
+          })
         }
       >
         Reload Data
       </Button>
       <RoleComponentRender
         condition={
-          profileUser?.placement === 'main_office' &&
+          profileUser?.placement === 'executor_unit' &&
           profileUser?.type === 'creator'
         }
       >
@@ -149,6 +166,8 @@ const PengelolaAkunInfluencer = ({ isMobile }) => {
           onClick={() => {
             setOpenAdd(true)
           }}
+          loading={isLoading}
+          disabled={data?.data?.length}
         >
           Add New
         </Button>
@@ -156,30 +175,70 @@ const PengelolaAkunInfluencer = ({ isMobile }) => {
     </Space>,
   ]
 
+  const items = [
+    {
+      key: '1',
+      label: 'Period Date',
+      children: `${dayjs(new Date(detail?.data?.period_date))
+        .locale('id')
+        .format('YYYY MMMM')}`,
+    },
+    {
+      key: '2',
+      label: 'Target',
+      children: `${detail?.data?.target}`,
+    },
+  ]
+
   return (
     <LayoutIndicators>
-      <Card bordered={false} extra={extraDesktop}>
-        <Table
-          rowKey="key"
-          dataSource={data?.data}
-          columns={columns}
-          loading={isLoading}
-          style={{ width: '100%' }}
-          scroll={{ y: '50vh' }}
-          pagination={{
-            total: data?.pagination?.total,
-            current: data?.pagination?.currentPage,
-            pageSize: data?.pagination?.perPage,
-            showQuickJumper: false,
-            hideOnSinglePage: true,
-            showTotal: (total) => `${total} Data`,
-            onChange: (page) =>
-              fetchingData({
-                prefixUrl: `/${router?.query?.slug}?page=${page}`,
-              }),
-          }}
-          size="small"
-        />
+      <Card
+        title={
+          <Space>
+            <Button
+              icon={<ArrowLeftOutlined />}
+              onClick={() =>
+                router.push(`/indicators/${router?.query?.slug}`)
+              }
+            />
+            <Text>Back</Text>
+          </Space>
+        }
+        bordered={false}
+        extra={extraDesktop}
+      >
+        <Row gutter={[24, 24]}>
+          <Col span={24}>
+            <Row>
+              <Col span={12}>
+                <Descriptions items={items} bordered />
+              </Col>
+            </Row>
+          </Col>
+          <Col span={24}>
+            <Table
+              rowKey="key"
+              dataSource={data?.data ?? []}
+              columns={columns}
+              loading={isLoading}
+              style={{ width: '100%' }}
+              scroll={{ x: 1300, y: '50vh' }}
+              pagination={{
+                total: data?.pagination?.total,
+                current: data?.pagination?.currentPage,
+                pageSize: data?.pagination?.perPage,
+                showQuickJumper: false,
+                hideOnSinglePage: true,
+                showTotal: (total) => `${total} Data`,
+                onChange: (page) =>
+                  fetchingData({
+                    prefixUrl: `/${router?.query?.slug}-item/parent/${router?.query?.id}?page=${page}`,
+                  }),
+              }}
+              size="small"
+            />
+          </Col>
+        </Row>
         {isOpenAdd && (
           <Add
             isMobile={isMobile}
@@ -187,7 +246,9 @@ const PengelolaAkunInfluencer = ({ isMobile }) => {
             onClose={() => {
               setOpenAdd(false)
               Modal.destroyAll()
-              fetchingData({ prefixUrl: `/${router?.query?.slug}` })
+              fetchingData({
+                prefixUrl: `/${router?.query?.slug}-item/parent/${router?.query?.id}`,
+              })
             }}
           />
         )}
@@ -198,7 +259,9 @@ const PengelolaAkunInfluencer = ({ isMobile }) => {
             onClose={() => {
               setOpenEdit(false)
               Modal.destroyAll()
-              fetchingData({ prefixUrl: `/${router?.query?.slug}` })
+              fetchingData({
+                prefixUrl: `/${router?.query?.slug}-item/parent/${router?.query?.id}`,
+              })
             }}
           />
         )}
@@ -207,4 +270,4 @@ const PengelolaAkunInfluencer = ({ isMobile }) => {
   )
 }
 
-export default PengelolaAkunInfluencer
+export default PengelolaAkunInfluencerDetail

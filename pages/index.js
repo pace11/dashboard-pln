@@ -129,7 +129,7 @@ export default function Home() {
           >
             <BarReactChart
               width={sizeWidth?.barWidth}
-              data={grafikPosts?.data}
+              // data={grafikPosts?.data}
             />
           </Card>
         </Col>
@@ -141,7 +141,7 @@ export default function Home() {
           >
             <BarReactChart
               width={sizeWidth?.barWidth}
-              data={grafikUnit?.data}
+              // data={grafikUnit?.data}
             />
           </Card>
         </Col>

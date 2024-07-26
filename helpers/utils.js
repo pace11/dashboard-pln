@@ -188,6 +188,26 @@ export const labelStatus = (type) => {
       ),
       tag: <Badge status="success" text="Final Approved" />,
     },
+    final_approved_2: {
+      alert: (
+        <Alert
+          message="Post Final Approved 2"
+          type="success"
+          showIcon
+        />
+      ),
+      tag: <Badge status="success" text="Final Approved 2" />,
+    },
+    final_approved_3: {
+      alert: (
+        <Alert
+          message="Post Final Approved 3"
+          type="success"
+          showIcon
+        />
+      ),
+      tag: <Badge status="success" text="Final Approved 3" />,
+    },
     rejected: {
       alert: <Alert message="Post Rejected" type="error" showIcon />,
       tag: <Badge status="error" text="Rejected" />,
@@ -197,6 +217,26 @@ export const labelStatus = (type) => {
         <Alert message="Post Final Rejected" type="error" showIcon />
       ),
       tag: <Badge status="error" text="Final Rejected" />,
+    },
+    final_rejected_2: {
+      alert: (
+        <Alert
+          message="Post Final Rejected 2"
+          type="error"
+          showIcon
+        />
+      ),
+      tag: <Badge status="error" text="Final Rejected 2" />,
+    },
+    final_rejected_3: {
+      alert: (
+        <Alert
+          message="Post Final Rejected 3"
+          type="error"
+          showIcon
+        />
+      ),
+      tag: <Badge status="error" text="Final Rejected 3" />,
     },
   }
 
@@ -245,17 +285,16 @@ export const stepProgress = ({ data = {} } = {}) => {
   const mapping = [
     {
       title: 'Created',
+      subTitle: data?.user?.email,
       description: formatDate(data?.created_at, false),
     },
     {
       title: 'Checked',
+      subTitle: data?.checked_by_email,
       description: (
         <Space direction="vertical">
           <Typography.Text type="secondary">
             {formatDate(data?.checked_by_date, false)}
-          </Typography.Text>
-          <Typography.Text type="secondary">
-            {data?.checked_by_email}
           </Typography.Text>
           <Typography.Text mark>
             {data?.checked_by_remarks
@@ -267,14 +306,12 @@ export const stepProgress = ({ data = {} } = {}) => {
     },
     {
       title: 'Approved',
+      subTitle: data?.approved_by_email || data?.rejected_by_email,
       description: (
         <>
           <Space direction="vertical">
             <Typography.Text type="secondary">
               {formatDate(data?.approved_by_date, false)}
-            </Typography.Text>
-            <Typography.Text type="secondary">
-              {data?.approved_by_email}
             </Typography.Text>
             <Typography.Text mark>
               {data?.approved_by_remarks
@@ -286,9 +323,6 @@ export const stepProgress = ({ data = {} } = {}) => {
             <Typography.Text type="secondary">
               {formatDate(data?.rejected_by_date, false)}
             </Typography.Text>
-            <Typography.Text type="secondary">
-              {data?.rejected_by_email}
-            </Typography.Text>
             <Typography.Text mark>
               {data?.rejected_by_remarks
                 ? `remarks: ${data?.rejected_by_remarks}`
@@ -299,14 +333,28 @@ export const stepProgress = ({ data = {} } = {}) => {
       ),
     },
     {
+      title: 'Final Created',
+      subTitle: data?.final_created_by_email,
+      description: (
+        <Space direction="vertical">
+          <Typography.Text type="secondary">
+            {formatDate(data?.final_created_by_date, false)}
+          </Typography.Text>
+          <Typography.Text mark>
+            {data?.final_created_by_remarks
+              ? `remarks: ${data?.final_created_by_remarks}`
+              : ''}
+          </Typography.Text>
+        </Space>
+      ),
+    },
+    {
       title: 'Final Checked',
+      subTitle: data?.final_checked_by_email,
       description: (
         <Space direction="vertical">
           <Typography.Text type="secondary">
             {formatDate(data?.final_checked_by_date, false)}
-          </Typography.Text>
-          <Typography.Text type="secondary">
-            {data?.final_checked_by_email}
           </Typography.Text>
           <Typography.Text mark>
             {data?.final_checked_by_remarks
@@ -317,15 +365,15 @@ export const stepProgress = ({ data = {} } = {}) => {
       ),
     },
     {
-      title: 'Final Approved',
+      title: 'Final Approved 1',
+      subTitle:
+        data?.final_approved_by_email ||
+        data?.final_rejected_by_email,
       description: (
         <>
           <Space direction="vertical">
             <Typography.Text type="secondary">
               {formatDate(data?.final_approved_by_date, false)}
-            </Typography.Text>
-            <Typography.Text type="secondary">
-              {data?.final_approved_by_email}
             </Typography.Text>
             <Typography.Text mark>
               {data?.final_approved_by_remarks
@@ -337,12 +385,69 @@ export const stepProgress = ({ data = {} } = {}) => {
             <Typography.Text type="secondary">
               {formatDate(data?.final_rejected_by_date, false)}
             </Typography.Text>
-            <Typography.Text type="secondary">
-              {data?.final_rejected_by_email}
-            </Typography.Text>
             <Typography.Text mark>
               {data?.final_rejected_by_remarks
                 ? `remarks: ${data?.final_rejected_by_remarks}`
+                : ''}
+            </Typography.Text>
+          </Space>
+        </>
+      ),
+    },
+    {
+      title: 'Final Approved 2',
+      subTitle:
+        data?.final_approved_2_by_email ||
+        data?.final_rejected_2_by_email,
+      description: (
+        <>
+          <Space direction="vertical">
+            <Typography.Text type="secondary">
+              {formatDate(data?.final_approved_2_by_date, false)}
+            </Typography.Text>
+            <Typography.Text mark>
+              {data?.final_approved_2_by_remarks
+                ? `remarks: ${data?.final_approved_2_by_remarks}`
+                : ''}
+            </Typography.Text>
+          </Space>
+          <Space direction="vertical">
+            <Typography.Text type="secondary">
+              {formatDate(data?.final_rejected_2_by_date, false)}
+            </Typography.Text>
+            <Typography.Text mark>
+              {data?.final_rejected_2_by_remarks
+                ? `remarks: ${data?.final_rejected_2_by_remarks}`
+                : ''}
+            </Typography.Text>
+          </Space>
+        </>
+      ),
+    },
+    {
+      title: 'Final Approved 3',
+      subTitle:
+        data?.final_approved_3_by_email ||
+        data?.final_rejected_3_by_email,
+      description: (
+        <>
+          <Space direction="vertical">
+            <Typography.Text type="secondary">
+              {formatDate(data?.final_approved_3_by_date, false)}
+            </Typography.Text>
+            <Typography.Text mark>
+              {data?.final_approved_3_by_remarks
+                ? `remarks: ${data?.final_approved_3_by_remarks}`
+                : ''}
+            </Typography.Text>
+          </Space>
+          <Space direction="vertical">
+            <Typography.Text type="secondary">
+              {formatDate(data?.final_rejected_3_by_date, false)}
+            </Typography.Text>
+            <Typography.Text mark>
+              {data?.final_rejected_3_by_remarks
+                ? `remarks: ${data?.final_rejected_3_by_remarks}`
                 : ''}
             </Typography.Text>
           </Space>
@@ -355,3 +460,95 @@ export const stepProgress = ({ data = {} } = {}) => {
 }
 
 export const imagePreview = ({ data = [] }) => data?.[0]?.url ?? ''
+
+export const approvedStatus = ({ status = '' }) => {
+  const mapping = {
+    final_checked: 'final_approved',
+    final_approved: 'final_approved_2',
+    final_approved_2: 'final_approved_3',
+  }
+  return mapping?.[status] ?? 'approved'
+}
+
+export const rejectedStatus = ({ status = '' }) => {
+  const mapping = {
+    final_checked: 'final_rejected',
+    final_approved: 'final_rejected_2',
+    final_approved_2: 'final_rejected_3',
+  }
+  return mapping?.[status] ?? 'rejected'
+}
+
+export const checkConditionApprovedRejected = ({
+  data = {},
+} = {}) => {
+  if (data?.is_approver && ['checked'].includes(data?.status))
+    return true
+  if (data?.is_approver && ['final_checked'].includes(data?.status))
+    return true
+  if (
+    data?.is_approver_2 &&
+    ['final_approved'].includes(data?.status)
+  )
+    return true
+  if (
+    data?.is_approver_3 &&
+    ['final_approved_2'].includes(data?.status)
+  )
+    return true
+  return false
+}
+
+export const checkConditionEdit = ({ data = {} } = {}) => {
+  if (
+    (!!data?.is_own_post ||
+      !!data?.is_superadmin ||
+      !!data?.is_creator ||
+      !!data?.is_checker ||
+      !!data?.is_approver ||
+      !!data?.is_approver_2 ||
+      !!data?.is_approver_3) &&
+    ![
+      'rejected',
+      'final_rejected',
+      'final_rejected_2',
+      'final_rejected_3',
+    ]
+  )
+    return true
+  return false
+}
+
+export const checkConditionRecreate = ({ data = {} } = {}) => {
+  if (
+    !!data?.is_own_post &&
+    !data?.recreated &&
+    [
+      'rejected',
+      'final_rejected',
+      'final_rejected_2',
+      'final_rejected_3',
+    ].includes(data?.status)
+  )
+    return true
+  return false
+}
+
+export const getFilename = ({ file = '' } = {}) => {
+  if (file) {
+    return String(file).split('/images/')?.[1]
+  }
+}
+
+export function validURL(str) {
+  const pattern = new RegExp(
+    '^(https?:\\/\\/)?' + // protocol
+      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+      '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+      '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+      '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+      '(\\#[-a-z\\d_]*)?$',
+    'i',
+  ) // fragment locator
+  return !!pattern.test(str)
+}

@@ -1,37 +1,38 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { MEDIA_POST } from '@/constants'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
-import {
-  CloseOutlined,
-  ExclamationCircleOutlined,
-  SaveOutlined,
-} from '@ant-design/icons'
+import { CloseOutlined, SaveOutlined } from '@ant-design/icons'
 import {
   Button,
+  DatePicker,
   Drawer,
   Form,
-  Input,
-  Modal,
-  Select,
+  InputNumber,
   Space,
 } from 'antd'
-import { useRef, useState } from 'react'
+import dayjs from 'dayjs'
+import { useRouter } from 'next/router'
+import { useRef } from 'react'
 
 export default function Add({ isMobile, onClose, isOpenAdd }) {
+  const router = useRouter()
   const { useMutate, isLoadingSubmit } = useQueriesMutation({})
   const refButton = useRef(null)
   const [form] = Form.useForm()
-  const [isEditing, setEditing] = useState(false)
 
   const onSubmitClick = () => {
-    // `current` points to the mounted text input element
     refButton.current.click()
   }
 
   const onFinish = async (values) => {
+    const payload = { ...values }
+    payload.period_date = dayjs(
+      new Date(payload?.period_date),
+    ).format('YYYY')
+    payload.target = payload?.target ?? 0
+
     const response = await useMutate({
-      prefixUrl: '/media',
-      payload: values,
+      prefixUrl: `/${router?.query?.slug}`,
+      payload,
     })
     if (response?.success) {
       onClose()
@@ -40,36 +41,14 @@ export default function Add({ isMobile, onClose, isOpenAdd }) {
   }
 
   const showConfirmClose = () => {
-    if (isEditing) {
-      Modal.confirm({
-        title: 'Close Confirm',
-        content: (
-          <p>
-            Are you sure you want to leave this form? Previous data
-            will not be saved ?
-          </p>
-        ),
-        icon: <ExclamationCircleOutlined />,
-        okText: 'Yes',
-        cancelText: 'No',
-        onOk: () => {
-          onClose()
-          form.resetFields()
-          setEditing(false)
-        },
-        onCancel: () => {},
-      })
-    } else {
-      onClose()
-      form.resetFields()
-      setEditing(false)
-    }
+    onClose()
+    form.resetFields()
   }
 
   return (
     <Drawer
-      title={isMobile ? false : 'Add Post'}
-      width={isMobile ? '100%' : 900}
+      title={isMobile ? false : 'Add'}
+      width={isMobile ? '100%' : 600}
       placement={isMobile ? 'bottom' : 'right'}
       onClose={showConfirmClose}
       open={isOpenAdd}
@@ -100,7 +79,7 @@ export default function Add({ isMobile, onClose, isOpenAdd }) {
           span: 24,
         }}
         wrapperCol={{
-          span: 24,
+          span: 8,
         }}
         initialValues={{
           remember: true,
@@ -109,74 +88,30 @@ export default function Add({ isMobile, onClose, isOpenAdd }) {
         // onFinishFailed={onFinishFailed}
         onFinish={onFinish}
         labelAlign="left"
-        onValuesChange={(value) => setEditing(!!value)}
       >
         <Form.Item
-          label="Title"
-          name="title"
+          label="Year"
+          name="period_date"
           rules={[
             {
               required: true,
-              message: 'please enter title!',
+              message: 'please select year!',
             },
           ]}
         >
-          <Input.TextArea size="large" placeholder="Title ..." />
-        </Form.Item>
-        <Form.Item
-          label="Url"
-          name="url"
-          rules={[
-            {
-              required: true,
-              message: 'please enter url!',
-            },
-          ]}
-        >
-          <Input.TextArea
+          <DatePicker
             size="large"
-            placeholder="Url example: https://drive.google.com/drive/..."
+            picker="year"
+            style={{ width: '100%' }}
           />
         </Form.Item>
-        <Form.Item
-          label="Caption"
-          name="caption"
-          rules={[
-            {
-              required: true,
-              message: 'please enter caption!',
-            },
-          ]}
-        >
-          <Input.TextArea rows={6} size="large" placeholder="Caption ..." />
-        </Form.Item>
-        <Form.Item
-          label="Target Post"
-          name="target_post"
-          rules={[
-            {
-              required: true,
-              message: 'Please select target post!',
-            },
-          ]}
-        >
-          <Select
+        <Form.Item label="Target" name="target">
+          <InputNumber
+            min={0}
             size="large"
-            showSearch
-            placeholder="Select ..."
-            notFoundContent="Data not found"
-            filterOption={(input, option) =>
-              option.children
-                .toLowerCase()
-                .indexOf(input.toLowerCase()) >= 0
-            }
-          >
-            {MEDIA_POST?.map((item) => (
-              <Select.Option key={item} value={item}>
-                {item}
-              </Select.Option>
-            ))}
-          </Select>
+            placeholder="Target ..."
+            style={{ width: '100%' }}
+          />
         </Form.Item>
         <Form.Item hidden>
           <Button ref={refButton} type="primary" htmlType="submit">

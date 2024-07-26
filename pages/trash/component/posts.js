@@ -52,7 +52,7 @@ const Posts = () => {
       title: 'Thumbnails',
       render: ({ thumbnail }) => (
         <Image
-          src={`${process.env.NEXT_PUBLIC_PATH_IMAGE}/${thumbnail}`}
+          src={thumbnail}
           alt={thumbnail}
           fallback={IMAGE_FALLBACK}
         />

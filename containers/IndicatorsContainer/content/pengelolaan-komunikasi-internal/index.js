@@ -1,19 +1,21 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import RoleComponentRender from '@/components/role-component-render'
 import { ProfileContext } from '@/context/profileContextProvider'
-import { formatDate, labelYesNo, roleUser } from '@/helpers/utils'
+import { formatDate } from '@/helpers/utils'
 import LayoutIndicators from '@/layout/indicators'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import {
   DeleteOutlined,
   EditOutlined,
   ExclamationCircleOutlined,
-  LinkOutlined,
+  EyeOutlined,
   PlusOutlined,
   ReloadOutlined,
 } from '@ant-design/icons'
 import { Button, Card, Modal, Space, Table, Typography } from 'antd'
+import dayjs from 'dayjs'
 import dynamic from 'next/dynamic'
+import { useRouter } from 'next/router'
 import { useContext, useState } from 'react'
 
 const Add = dynamic(() => import('./drawer/add'))
@@ -21,15 +23,13 @@ const Edit = dynamic(() => import('./drawer/edit'))
 
 const { Paragraph, Text } = Typography
 
-const PengelolaKomunikasiInternal = ({ isMobile }) => {
+const PengelolaAkunInfluencer = ({ isMobile }) => {
+  const router = useRouter()
   const profileUser = useContext(ProfileContext)
-  const url = ['superadmin'].includes(roleUser({ user: profileUser }))
-    ? '/link/key/indicator-4'
-    : '/link/key/indicator-4/active'
-  const { data, isLoading, fetchingData, useMutate } =
-    useQueriesMutation({
-      prefixUrl: url,
-    })
+  const { useMutate } = useQueriesMutation({})
+  const { data, isLoading, fetchingData } = useQueriesMutation({
+    prefixUrl: `/${router?.query?.slug}`,
+  })
   const [isOpenAdd, setOpenAdd] = useState(false)
   const [isOpenEdit, setOpenEdit] = useState(false)
 
@@ -46,7 +46,7 @@ const PengelolaKomunikasiInternal = ({ isMobile }) => {
           method: 'DELETE',
         })
         if (response?.success) {
-          fetchingData({ prefixUrl: url })
+          fetchingData({ prefixUrl: `/${router?.query?.slug}` })
         }
       },
       onCancel: () => {},
@@ -55,32 +55,18 @@ const PengelolaKomunikasiInternal = ({ isMobile }) => {
 
   const columns = [
     {
-      title: 'Title',
-      render: ({ title }) => <Paragraph>{title}</Paragraph>,
-    },
-    {
-      title: 'Url',
-      render: ({ url }) => (
-        <Space direction="vertical">
-          <Paragraph>{url}</Paragraph>
-          <Button
-            icon={<LinkOutlined />}
-            type="dashed"
-            onClick={() => window.open(url, '_blank')}
-            size="small"
-          >
-            Open Url
-          </Button>
-        </Space>
+      title: 'Period Date',
+      render: ({ period_date }) => (
+        <Paragraph>
+          {dayjs(new Date(period_date))
+            .locale('id')
+            .format('YYYY MMMM')}
+        </Paragraph>
       ),
     },
     {
-      title: 'Periode',
-      render: ({ period }) => <Text>{period}</Text>,
-    },
-    {
-      title: 'Active',
-      render: ({ active }) => labelYesNo(active),
+      title: 'Target',
+      render: ({ target }) => <Text>{target}</Text>,
     },
     {
       title: 'Created At',
@@ -89,11 +75,22 @@ const PengelolaKomunikasiInternal = ({ isMobile }) => {
       render: (created_at) => formatDate(created_at),
     },
     {
+      title: 'Updated At',
+      key: 'updated_at',
+      dataIndex: 'updated_at',
+      render: (updated_at) => formatDate(updated_at),
+    },
+    {
       title: 'Aksi',
       fixed: 'right',
       render: (item) => (
-        <Space direction="vertical">
-          <RoleComponentRender condition={!!item?.is_superadmin}>
+        <Space>
+          <RoleComponentRender
+            condition={
+              profileUser?.placement === 'main_office' &&
+              profileUser?.type === 'creator'
+            }
+          >
             <Button
               type="dashed"
               icon={<EditOutlined />}
@@ -102,12 +99,28 @@ const PengelolaKomunikasiInternal = ({ isMobile }) => {
               Edit
             </Button>
           </RoleComponentRender>
-          <RoleComponentRender condition={!!item?.is_superadmin}>
+          <Button
+            icon={<EyeOutlined />}
+            onClick={() =>
+              router.push(
+                `/indicators/${router?.query?.slug}/${item?.id}`,
+              )
+            }
+          >
+            Detail
+          </Button>
+          <RoleComponentRender
+            condition={
+              profileUser?.placement === 'main_office' &&
+              profileUser?.type === 'creator'
+            }
+          >
             <Button
               danger
               type="primary"
               icon={<DeleteOutlined />}
               onClick={() => showConfirmDelete(item)}
+              hidden
             >
               Delete
             </Button>
@@ -121,14 +134,17 @@ const PengelolaKomunikasiInternal = ({ isMobile }) => {
     <Space key="descktop-action-pegawai">
       <Button
         icon={<ReloadOutlined />}
-        onClick={() => fetchingData({ prefixUrl: url })}
+        onClick={() =>
+          fetchingData({ prefixUrl: `/${router?.query?.slug}` })
+        }
       >
         Reload Data
       </Button>
       <RoleComponentRender
-        condition={['superadmin'].includes(
-          roleUser({ user: profileUser }),
-        )}
+        condition={
+          profileUser?.placement === 'main_office' &&
+          profileUser?.type === 'creator'
+        }
       >
         <Button
           type="primary"
@@ -137,7 +153,7 @@ const PengelolaKomunikasiInternal = ({ isMobile }) => {
             setOpenAdd(true)
           }}
         >
-          Add Link
+          Add New
         </Button>
       </RoleComponentRender>
     </Space>,
@@ -152,7 +168,7 @@ const PengelolaKomunikasiInternal = ({ isMobile }) => {
           columns={columns}
           loading={isLoading}
           style={{ width: '100%' }}
-          scroll={{ x: 1300, y: '50vh' }}
+          scroll={{ y: '50vh' }}
           pagination={{
             total: data?.pagination?.total,
             current: data?.pagination?.currentPage,
@@ -162,7 +178,7 @@ const PengelolaKomunikasiInternal = ({ isMobile }) => {
             showTotal: (total) => `${total} Data`,
             onChange: (page) =>
               fetchingData({
-                prefixUrl: `${url}?page=${page}`,
+                prefixUrl: `/${router?.query?.slug}?page=${page}`,
               }),
           }}
           size="small"
@@ -174,7 +190,7 @@ const PengelolaKomunikasiInternal = ({ isMobile }) => {
             onClose={() => {
               setOpenAdd(false)
               Modal.destroyAll()
-              fetchingData({ prefixUrl: url })
+              fetchingData({ prefixUrl: `/${router?.query?.slug}` })
             }}
           />
         )}
@@ -185,7 +201,7 @@ const PengelolaKomunikasiInternal = ({ isMobile }) => {
             onClose={() => {
               setOpenEdit(false)
               Modal.destroyAll()
-              fetchingData({ prefixUrl: url })
+              fetchingData({ prefixUrl: `/${router?.query?.slug}` })
             }}
           />
         )}
@@ -194,4 +210,4 @@ const PengelolaKomunikasiInternal = ({ isMobile }) => {
   )
 }
 
-export default PengelolaKomunikasiInternal
+export default PengelolaAkunInfluencer

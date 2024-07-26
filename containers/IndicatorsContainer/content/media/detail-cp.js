@@ -1,43 +1,33 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import RoleComponentRender from '@/components/role-component-render'
-import { IMAGE_FALLBACK } from '@/constants'
 import { ProfileContext } from '@/context/profileContextProvider'
-import { labelStatus, labelYesNo, roleUser } from '@/helpers/utils'
+import { formatDate, labelStatus, roleUser } from '@/helpers/utils'
+import LayoutIndicators from '@/layout/indicators'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import {
   DeleteOutlined,
   EditOutlined,
   ExclamationCircleOutlined,
   EyeOutlined,
+  LinkOutlined,
   PlusOutlined,
   ReloadOutlined,
-  TagsOutlined,
 } from '@ant-design/icons'
-import {
-  Button,
-  Card,
-  Image,
-  Modal,
-  Space,
-  Table,
-  Tag,
-  Typography,
-} from 'antd'
-import dayjs from 'dayjs'
+import { Button, Card, Modal, Space, Table, Typography } from 'antd'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { useContext, useState } from 'react'
 
-const Add = dynamic(() => import('./drawer/add'))
-const Edit = dynamic(() => import('./drawer/edit'))
+const Add = dynamic(() => import('./drawer/add-item'))
+const Edit = dynamic(() => import('./drawer/edit-item'))
 
 const { Paragraph, Text } = Typography
 
-const Posts = ({ isMobile }) => {
+const Media = ({ isMobile }) => {
   const profileUser = useContext(ProfileContext)
   const { data, isLoading, fetchingData, useMutate } =
     useQueriesMutation({
-      prefixUrl: '/posts',
+      prefixUrl: '/media',
     })
   const [isOpenAdd, setOpenAdd] = useState(false)
   const [isOpenEdit, setOpenEdit] = useState(false)
@@ -52,11 +42,11 @@ const Posts = ({ isMobile }) => {
       cancelText: 'No',
       onOk: async () => {
         const response = await useMutate({
-          prefixUrl: `/post/${params?.id}`,
+          prefixUrl: `/media/${params?.id}`,
           method: 'DELETE',
         })
         if (response?.success) {
-          fetchingData({ prefixUrl: '/posts' })
+          fetchingData({ prefixUrl: '/media' })
         }
       },
       onCancel: () => {},
@@ -65,46 +55,35 @@ const Posts = ({ isMobile }) => {
 
   const columns = [
     {
-      title: 'Thumbnails',
-      render: ({ thumbnail }) => (
-        <Image
-          src={`${process.env.NEXT_PUBLIC_PATH_IMAGE}/${thumbnail}`}
-          alt={thumbnail}
-          fallback={IMAGE_FALLBACK}
-        />
-      ),
-    },
-    {
       title: 'Title',
-      render: ({ title }) => (
-        <Paragraph ellipsis={{ rows: 5 }}>{title}</Paragraph>
+      render: ({ title }) => <Paragraph>{title}</Paragraph>,
+    },
+    {
+      title: 'Url',
+      width: 300,
+      render: ({ url }) => (
+        <Space direction="vertical">
+          <Paragraph>{url}</Paragraph>
+          <Button
+            icon={<LinkOutlined />}
+            type="dashed"
+            onClick={() => window.open(url, '_blank')}
+            size="small"
+          >
+            Open Url
+          </Button>
+        </Space>
       ),
     },
     {
-      title: 'Slug',
-      render: ({ slug }) => (
-        <Paragraph ellipsis={{ rows: 4 }}>{slug}</Paragraph>
+      title: 'Caption',
+      render: ({ caption }) => (
+        <Paragraph ellipsis={{ rows: 3 }}>{caption}</Paragraph>
       ),
     },
     {
-      title: 'Category',
-      render: ({ categories }) => (
-        <Tag color="purple" icon={<TagsOutlined />}>
-          {categories?.title}
-        </Tag>
-      ),
-    },
-    {
-      title: 'Posted',
-      key: 'posted',
-      dataIndex: 'posted',
-      render: (posted) => labelYesNo(posted),
-    },
-    {
-      title: 'Banner',
-      key: 'banner',
-      dataIndex: 'banner',
-      render: (banner) => labelYesNo(banner),
+      title: 'Target Post',
+      render: ({ target_post }) => <Text>{target_post}</Text>,
     },
     {
       title: 'Status',
@@ -124,10 +103,7 @@ const Posts = ({ isMobile }) => {
       title: 'Created At',
       key: 'created_at',
       dataIndex: 'created_at',
-      render: (created_at) =>
-        created_at
-          ? dayjs(created_at).locale('id').format('DD MMMM YYYY')
-          : '-',
+      render: (created_at) => formatDate(created_at),
     },
     {
       title: 'Aksi',
@@ -138,13 +114,15 @@ const Posts = ({ isMobile }) => {
             condition={
               !!item?.is_own_post ||
               !!item?.is_superadmin ||
-              !!item?.is_admin
+              !!item?.is_checker ||
+              !!item?.is_approver
             }
           >
             <Button
               type="dashed"
               icon={<EditOutlined />}
               onClick={() => setOpenEdit(item)}
+              hidden={['rejected', 'final_rejected'].includes(item?.status)}
             >
               Edit
             </Button>
@@ -152,7 +130,9 @@ const Posts = ({ isMobile }) => {
           <Button
             type="dashed"
             icon={<EyeOutlined />}
-            onClick={() => router.push(`/posts/${item?.id}`)}
+            onClick={() =>
+              router.push(`/indicators/media/${item?.id}`)
+            }
           >
             Detail
           </Button>
@@ -160,7 +140,8 @@ const Posts = ({ isMobile }) => {
             condition={
               !!item?.is_own_post ||
               !!item?.is_superadmin ||
-              !!item?.is_admin
+              !!item?.is_checker ||
+              !!item?.is_approver
             }
           >
             <Button
@@ -168,6 +149,7 @@ const Posts = ({ isMobile }) => {
               type="primary"
               icon={<DeleteOutlined />}
               onClick={() => showConfirmDelete(item)}
+              hidden={['rejected', 'final_rejected'].includes(item?.status)}
             >
               Delete
             </Button>
@@ -181,12 +163,12 @@ const Posts = ({ isMobile }) => {
     <Space key="descktop-action-pegawai">
       <Button
         icon={<ReloadOutlined />}
-        onClick={() => fetchingData({ prefixUrl: '/posts' })}
+        onClick={() => fetchingData({ prefixUrl: '/media' })}
       >
         Reload Data
       </Button>
       <RoleComponentRender
-        condition={['creator', 'superadmin', 'admin'].includes(
+        condition={['creator', 'superadmin'].includes(
           roleUser({ user: profileUser }),
         )}
       >
@@ -197,57 +179,59 @@ const Posts = ({ isMobile }) => {
             setOpenAdd(true)
           }}
         >
-          Add Post
+          Add Media
         </Button>
       </RoleComponentRender>
     </Space>,
   ]
 
   return (
-    <Card title="Posts" bordered={false} extra={extraDesktop}>
-      <Table
-        rowKey="key"
-        dataSource={data?.data}
-        columns={columns}
-        loading={isLoading}
-        style={{ width: '100%' }}
-        scroll={{ x: 1300, y: '50vh' }}
-        pagination={{
-          total: data?.pagination?.total,
-          current: data?.pagination?.currentPage,
-          pageSize: data?.pagination?.perPage,
-          showQuickJumper: false,
-          hideOnSinglePage: true,
-          showTotal: (total) => `${total} Data`,
-          onChange: (page) =>
-            fetchingData({ prefixUrl: `/posts?page=${page}` }),
-        }}
-        size="small"
-      />
-      {isOpenAdd && (
-        <Add
-          isMobile={isMobile}
-          isOpenAdd={isOpenAdd}
-          onClose={() => {
-            setOpenAdd(false)
-            Modal.destroyAll()
-            fetchingData({ prefixUrl: '/posts' })
+    <LayoutIndicators>
+      <Card bordered={false} extra={extraDesktop}>
+        <Table
+          rowKey="key"
+          dataSource={data?.data}
+          columns={columns}
+          loading={isLoading}
+          style={{ width: '100%' }}
+          scroll={{ x: 1300, y: '50vh' }}
+          pagination={{
+            total: data?.pagination?.total,
+            current: data?.pagination?.currentPage,
+            pageSize: data?.pagination?.perPage,
+            showQuickJumper: false,
+            hideOnSinglePage: true,
+            showTotal: (total) => `${total} Data`,
+            onChange: (page) =>
+              fetchingData({ prefixUrl: `/media?page=${page}` }),
           }}
+          size="small"
         />
-      )}
-      {isOpenEdit && (
-        <Edit
-          isMobile={isMobile}
-          isOpen={isOpenEdit}
-          onClose={() => {
-            setOpenEdit(false)
-            Modal.destroyAll()
-            fetchingData({ prefixUrl: `/posts` })
-          }}
-        />
-      )}
-    </Card>
+        {isOpenAdd && (
+          <Add
+            isMobile={isMobile}
+            isOpenAdd={isOpenAdd}
+            onClose={() => {
+              setOpenAdd(false)
+              Modal.destroyAll()
+              fetchingData({ prefixUrl: '/media' })
+            }}
+          />
+        )}
+        {isOpenEdit && (
+          <Edit
+            isMobile={isMobile}
+            isOpen={isOpenEdit}
+            onClose={() => {
+              setOpenEdit(false)
+              Modal.destroyAll()
+              fetchingData({ prefixUrl: `/media` })
+            }}
+          />
+        )}
+      </Card>
+    </LayoutIndicators>
   )
 }
 
-export default Posts
+export default Media
