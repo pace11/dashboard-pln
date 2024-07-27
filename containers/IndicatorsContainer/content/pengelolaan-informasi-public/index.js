@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import RoleComponentRender from '@/components/role-component-render'
 import { ProfileContext } from '@/context/profileContextProvider'
-import { formatDate } from '@/helpers/utils'
+import { dateStatus, formatDate } from '@/helpers/utils'
 import LayoutIndicators from '@/layout/indicators'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import {
@@ -21,7 +21,7 @@ import { useContext, useState } from 'react'
 const Add = dynamic(() => import('./drawer/add'))
 const Edit = dynamic(() => import('./drawer/edit'))
 
-const { Paragraph, Text } = Typography
+const { Paragraph } = Typography
 
 const PengelolaAkunInfluencer = ({ isMobile }) => {
   const router = useRouter()
@@ -63,6 +63,10 @@ const PengelolaAkunInfluencer = ({ isMobile }) => {
             .format('YYYY MMMM')}
         </Paragraph>
       ),
+    },
+    {
+      title: 'Status',
+      render: ({ date_status }) => dateStatus({ type: date_status }) ,
     },
     {
       title: 'Created At',

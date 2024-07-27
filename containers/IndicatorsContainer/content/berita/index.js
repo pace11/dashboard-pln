@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import RoleComponentRender from '@/components/role-component-render'
 import { ProfileContext } from '@/context/profileContextProvider'
-import { formatDate } from '@/helpers/utils'
+import { dateStatus, formatDate } from '@/helpers/utils'
 import LayoutIndicators from '@/layout/indicators'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import {
@@ -65,6 +65,10 @@ const Berita = ({ isMobile }) => {
             .format('YYYY MMMM')}
         </Paragraph>
       ),
+    },
+    {
+      title: 'Status',
+      render: ({ date_status }) => dateStatus({ type: date_status }) ,
     },
     {
       title: 'Target',

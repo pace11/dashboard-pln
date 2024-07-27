@@ -543,12 +543,12 @@ export const checkConditionDelete = ({ data = {} } = {}) =>
   ].includes(data?.status)
 
 export const checkConditionEditItem = ({ data = {} } = {}) => {
-  if (!!data?.is_own_post || !!data?.is_creator) return true
+  if ((!!data?.is_own_post || !!data?.is_creator) && !data?.is_done_date) return true
   return false
 }
 
 export const checkConditionDeleteItem = ({ data = {} } = {}) => {
-  if (!!data?.is_own_post) return true
+  if (!!data?.is_own_post && !data?.is_done_date) return true
   return false
 }
 
@@ -587,3 +587,13 @@ export const mappingOptionRelease = ({ data = [] } = {}) =>
     label: item?.number_release,
     value: item?.number_release,
   })) || []
+
+export const dateStatus = ({ type = '' } = {}) => {
+  const mapping = {
+    prev: <Tag>Already Passed</Tag>,
+    next: <Tag color="blue">Upcoming</Tag>,
+    current: <Tag color="green">Now</Tag>
+  }
+
+  return mapping?.[type] ?? mapping.prev;
+}
