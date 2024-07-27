@@ -50,7 +50,7 @@ const Login = () => {
             fontWeight: 'bold',
           }}
         >
-          DASHBOARD PLN
+          DASHBOARD KOM TJSL P3BS
         </h2>
         <p style={{ textAlign: 'center' }}>
           <Image
