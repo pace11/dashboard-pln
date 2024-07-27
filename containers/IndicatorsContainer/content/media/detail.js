@@ -32,7 +32,7 @@ import { useContext, useState } from 'react'
 const Add = dynamic(() => import('../media/drawer/add-item'))
 const Edit = dynamic(() => import('../media/drawer/edit-item'))
 
-const { Paragraph, Text } = Typography
+const { Text } = Typography
 
 const MediaDetail = ({ isMobile }) => {
   const router = useRouter()
@@ -77,12 +77,20 @@ const MediaDetail = ({ isMobile }) => {
       render: (item) => <Text>{item?.unit?.title}</Text>,
     },
     {
-      title: 'Realization',
-      render: ({ realization }) => <Text>{realization}</Text>,
+      title: 'Title',
+      render: ({ title }) => <Text>{title}</Text>,
     },
     {
-      title: 'Percentage',
-      render: ({ value }) => <Text>{value ? `${value}%` : '0'}</Text>,
+      title: 'Attachment Images',
+      render: ({ attachment_images }) => (
+        <Text>{JSON.parse(attachment_images)?.length}</Text>
+      ),
+    },
+    {
+      title: 'Attachment Videos',
+      render: ({ attachment_videos }) => (
+        <Text>{JSON.parse(attachment_videos)?.length}</Text>
+      ),
     },
     {
       title: 'Created At',
@@ -102,10 +110,7 @@ const MediaDetail = ({ isMobile }) => {
       render: (item) => (
         <Space direction="vertical">
           <RoleComponentRender
-            condition={
-              profileUser?.placement === 'executor_unit' &&
-              profileUser?.type === 'creator'
-            }
+            condition={!!item?.is_own_post || !!item?.is_creator}
           >
             <Button
               type="dashed"
@@ -122,12 +127,7 @@ const MediaDetail = ({ isMobile }) => {
           >
             View
           </Button>
-          <RoleComponentRender
-            condition={
-              profileUser?.placement === 'executor_unit' &&
-              profileUser?.type === 'creator'
-            }
-          >
+          <RoleComponentRender condition={!!item?.is_own_post}>
             <Button
               danger
               type="primary"
@@ -167,7 +167,6 @@ const MediaDetail = ({ isMobile }) => {
             setOpenAdd(true)
           }}
           loading={isLoading}
-          disabled={data?.data?.length}
         >
           Add New
         </Button>

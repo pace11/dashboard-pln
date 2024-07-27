@@ -1,27 +1,26 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { MEDIA_POST } from '@/constants'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import {
   CloseOutlined,
   ExclamationCircleOutlined,
   SaveOutlined,
 } from '@ant-design/icons'
-import {
-  Button,
-  Drawer,
-  Form,
-  Input,
-  Modal,
-  Select,
-  Space,
-} from 'antd'
+import { Button, Drawer, Form, Input, Modal, Space } from 'antd'
+import dynamic from 'next/dynamic'
+import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react'
 
+const UploadImage = dynamic(() => import('@/components/upload-image'))
+
 export default function Edit({ isMobile, onClose, isOpen }) {
+  const router = useRouter()
   const { useMutate, isLoadingSubmit } = useQueriesMutation({})
+  const { useMutate: useUpload } = useQueriesMutation({})
   const refButton = useRef(null)
   const [form] = Form.useForm()
   const [isEditing, setEditing] = useState(false)
+  const [fileList, setFileList] = useState([])
+  const [videoList, setVideoList] = useState([])
 
   const onSubmitClick = () => {
     // `current` points to the mounted text input element
@@ -29,11 +28,20 @@ export default function Edit({ isMobile, onClose, isOpen }) {
   }
 
   const onFinish = async (values) => {
+    const payload = {
+      title: values?.title || '',
+      attachment_images: JSON.stringify(fileList),
+      attachment_videos: JSON.stringify(videoList),
+      caption: values?.caption,
+      media_id: router?.query?.id,
+    }
+
     const response = await useMutate({
-      prefixUrl: `/media/${isOpen?.id}`,
+      prefixUrl: `/${router?.query?.slug}-item/${isOpen?.id}`,
       method: 'PATCH',
-      payload: values,
+      payload,
     })
+
     if (response?.success) {
       onClose()
       form.resetFields()
@@ -67,14 +75,88 @@ export default function Edit({ isMobile, onClose, isOpen }) {
     }
   }
 
+  const HandleChangeUpload = (event) => {
+    if (event?.file?.status === 'removed') {
+      setFileList(event?.fileList)
+    }
+  }
+
+  const HandleChangeVideoUpload = (event) => {
+    if (event?.file?.status === 'removed') {
+      setVideoList(event?.fileList)
+    }
+  }
+
+  const HandleBeforeUpload = async (file) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    const response = await useUpload({
+      prefixUrl: `/upload-image`,
+      isFormData: true,
+      payload: formData,
+    })
+    if (response?.success) {
+      setFileList((oldArray) => [
+        ...oldArray,
+        {
+          uid: oldArray.length + 1,
+          name: `${getFilename({ file: response?.data?.image })}`,
+          status: 'done',
+          url: `${response?.data?.image}`,
+        },
+      ])
+    } else {
+      setFileList([
+        {
+          uid: '1',
+          name: 'image.png',
+          status: 'error',
+        },
+      ])
+    }
+  }
+
+  const HandleBeforeUploadVideo = async (file) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    const response = await useUpload({
+      prefixUrl: `/upload-image`,
+      isFormData: true,
+      payload: formData,
+    })
+    if (response?.success) {
+      setVideoList((oldArray) => [
+        ...oldArray,
+        {
+          uid: oldArray.length + 1,
+          name: `${getFilename({ file: response?.data?.image })}`,
+          status: 'done',
+          url: `${response?.data?.image}`,
+        },
+      ])
+    } else {
+      setVideoList([
+        {
+          uid: '1',
+          name: 'image.png',
+          status: 'error',
+        },
+      ])
+    }
+  }
+
   useEffect(() => {
     if (!!isOpen) {
       form.setFieldsValue({
         title: isOpen?.title || '',
-        url: isOpen?.url || '',
         caption: isOpen?.caption || '',
-        target_post: isOpen?.target_post || '',
       })
+      if (!!isOpen?.attachment_images) {
+        setFileList(JSON.parse(isOpen?.attachment_images))
+      }
+      if (!!isOpen?.attachment_images) {
+        setVideoList(JSON.parse(isOpen?.attachment_images))
+      }
     }
   }, [isOpen, form])
 
@@ -136,19 +218,21 @@ export default function Edit({ isMobile, onClose, isOpen }) {
         >
           <Input.TextArea size="large" placeholder="Title ..." />
         </Form.Item>
-        <Form.Item
-          label="Url"
-          name="url"
-          rules={[
-            {
-              required: true,
-              message: 'please enter url!',
-            },
-          ]}
-        >
-          <Input.TextArea
-            size="large"
-            placeholder="Url example: https://drive.google.com/drive/..."
+        <Form.Item label="Attachment Image" name="attachment_images">
+          <UploadImage
+            fileList={fileList}
+            onChange={HandleChangeUpload}
+            onBeforeUpload={HandleBeforeUpload}
+            maxLength={20}
+          />
+        </Form.Item>
+        <Form.Item label="Attachment Video" name="attachment_videos">
+          <UploadImage
+            fileList={videoList}
+            onChange={HandleChangeVideoUpload}
+            onBeforeUpload={HandleBeforeUploadVideo}
+            maxLength={20}
+            type="text"
           />
         </Form.Item>
         <Form.Item
@@ -161,35 +245,11 @@ export default function Edit({ isMobile, onClose, isOpen }) {
             },
           ]}
         >
-          <Input.TextArea rows={6} size="large" placeholder="Caption ..." />
-        </Form.Item>
-        <Form.Item
-          label="Target Post"
-          name="target_post"
-          rules={[
-            {
-              required: true,
-              message: 'Please select target post!',
-            },
-          ]}
-        >
-          <Select
+          <Input.TextArea
+            rows={6}
             size="large"
-            showSearch
-            placeholder="Select ..."
-            notFoundContent="Data not found"
-            filterOption={(input, option) =>
-              option.children
-                .toLowerCase()
-                .indexOf(input.toLowerCase()) >= 0
-            }
-          >
-            {MEDIA_POST?.map((item) => (
-              <Select.Option key={item} value={item}>
-                {item}
-              </Select.Option>
-            ))}
-          </Select>
+            placeholder="Caption ..."
+          />
         </Form.Item>
         <Form.Item hidden>
           <Button ref={refButton} type="primary" htmlType="submit">

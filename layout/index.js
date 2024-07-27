@@ -111,8 +111,6 @@ const LayoutApp = ({ children, isMobile }) => {
     setActiveKey(arrRouter !== '/' ? `${arrRouter.toString()}` : '/')
   }, [router.asPath])
 
-  console.log('router => ', router)
-
   return (
     <>
       <Head>
