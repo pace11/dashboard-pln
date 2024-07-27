@@ -1,4 +1,4 @@
-import { formatDate } from '@/helpers/utils'
+import { formatDate, stripHtml } from '@/helpers/utils'
 
 const baseAlignment = {
   wrapText: true,
@@ -122,7 +122,7 @@ export const toExportNewsData = (data = []) => {
     { value: item.title || '-' },
     { value: item.slug || '-' },
     { value: item.categories.title || '-' },
-    { value: item.description || '-' },
+    { value: item.description ? stripHtml(item.description) : '-' },
     { value: item.status || '-' },
     { value: item.posted ? 'Ya' : 'Tidak' },
     { value: item.banner ? 'Ya' : 'Tidak' },

@@ -1,4 +1,4 @@
-import NewsContainer from '@/containers/IndicatorsContainer/content/news'
+import NewsContainer from '@/containers/IndicatorsContainer/content/berita'
 
 const Indicators = () => <NewsContainer />
 

@@ -1,7 +1,7 @@
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 
-const News = dynamic(() => import('./content/news'))
+const News = dynamic(() => import('./content/berita'))
 const Media = dynamic(() => import('./content/media'))
 const Influencer = dynamic(() =>
   import('./content/pengelolaan-akun-influencer'),
@@ -15,7 +15,7 @@ const InformasiPublic = dynamic(() =>
 )
 
 const templates = {
-  news: News,
+  berita: News,
   media: Media,
   'pengelolaan-akun-influencer': Influencer,
   'pengelolaan-komunikasi-internal': KomunikasiInternal,
@@ -26,7 +26,7 @@ const templates = {
 const IndicatorsContainer = () => {
   const router = useRouter()
   const { slug } = router?.query
-  const RenderComponent = templates?.[slug ?? 'news'] ?? null
+  const RenderComponent = templates?.[slug ?? 'berita'] ?? null
 
   if (RenderComponent) return <RenderComponent />
 }

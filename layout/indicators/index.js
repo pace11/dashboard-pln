@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 
 const items = ({ children }) => [
   {
-    key: 'news',
+    key: 'berita',
     label: '1. Release Berita',
     children: children,
   },
@@ -41,7 +41,7 @@ const LayoutIndicators = ({ children }) => {
   return (
     <Card>
       <Tabs
-        activeKey={slug || 'news'}
+        activeKey={slug || 'berita'}
         items={items({ children })}
         onTabClick={(key) => {
           router.push(`/indicators/${key}`)

@@ -1,7 +1,12 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import RoleComponentRender from '@/components/role-component-render'
 import { ProfileContext } from '@/context/profileContextProvider'
-import { formatDate } from '@/helpers/utils'
+import {
+  checkConditionAddItem,
+  checkConditionDeleteItem,
+  checkConditionEditItem,
+  formatDate,
+} from '@/helpers/utils'
 import LayoutIndicators from '@/layout/indicators'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import {
@@ -38,10 +43,11 @@ const MediaDetail = ({ isMobile }) => {
   const router = useRouter()
   const profileUser = useContext(ProfileContext)
   const { useMutate } = useQueriesMutation({})
-  const { data: detail } = useQueriesMutation({
-    enabled: !!router?.query?.id,
-    prefixUrl: `/${router?.query?.slug}/${router?.query?.id}`,
-  })
+  const { data: detail, fetchingData: fetchingDataDetail } =
+    useQueriesMutation({
+      enabled: !!router?.query?.id,
+      prefixUrl: `/${router?.query?.slug}/${router?.query?.id}`,
+    })
   const { data, isLoading, fetchingData } = useQueriesMutation({
     enabled: !!router?.query?.id,
     prefixUrl: `/${router?.query?.slug}-item/parent/${router?.query?.id}`,
@@ -93,6 +99,10 @@ const MediaDetail = ({ isMobile }) => {
       ),
     },
     {
+      title: 'Value',
+      render: ({ value }) => <Text>{value}</Text>,
+    },
+    {
       title: 'Created At',
       key: 'created_at',
       dataIndex: 'created_at',
@@ -110,7 +120,7 @@ const MediaDetail = ({ isMobile }) => {
       render: (item) => (
         <Space direction="vertical">
           <RoleComponentRender
-            condition={!!item?.is_own_post || !!item?.is_creator}
+            condition={checkConditionEditItem({ data: item })}
           >
             <Button
               type="dashed"
@@ -127,7 +137,9 @@ const MediaDetail = ({ isMobile }) => {
           >
             View
           </Button>
-          <RoleComponentRender condition={!!item?.is_own_post}>
+          <RoleComponentRender
+            condition={checkConditionDeleteItem({ data: item })}
+          >
             <Button
               danger
               type="primary"
@@ -146,19 +158,19 @@ const MediaDetail = ({ isMobile }) => {
     <Space key="descktop-action-pegawai">
       <Button
         icon={<ReloadOutlined />}
-        onClick={() =>
+        onClick={() => {
+          fetchingDataDetail({
+            prefixUrl: `/${router?.query?.slug}/${router?.query?.id}`,
+          })
           fetchingData({
             prefixUrl: `/${router?.query?.slug}-item/parent/${router?.query?.id}`,
           })
-        }
+        }}
       >
         Reload Data
       </Button>
       <RoleComponentRender
-        condition={
-          profileUser?.placement === 'executor_unit' &&
-          profileUser?.type === 'creator'
-        }
+        condition={checkConditionAddItem({ user: profileUser })}
       >
         <Button
           type="primary"
@@ -178,14 +190,18 @@ const MediaDetail = ({ isMobile }) => {
     {
       key: '1',
       label: 'Period Date',
-      children: `${dayjs(new Date(detail?.data?.period_date))
-        .locale('id')
-        .format('YYYY MMMM')}`,
+      children: `${
+        detail?.data?.period_date
+          ? dayjs(new Date(detail?.data?.period_date))
+              .locale('id')
+              .format('YYYY MMMM')
+          : ''
+      }`,
     },
     {
       key: '2',
       label: 'Target',
-      children: `${detail?.data?.target}`,
+      children: `${detail?.data?.target ?? '0'}`,
     },
   ]
 

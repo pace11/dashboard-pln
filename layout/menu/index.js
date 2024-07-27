@@ -2,6 +2,7 @@ import {
   AimOutlined,
   FileTextOutlined,
   HomeOutlined,
+  StockOutlined,
   TagsOutlined,
   UserAddOutlined,
 } from '@ant-design/icons'
@@ -13,8 +14,13 @@ export const sidebarMenu = ({ role = '' }) => [
     label: 'Home',
   },
   {
-    key: 'indicators',
+    key: 'news',
     icon: <FileTextOutlined />,
+    label: 'News',
+  },
+  {
+    key: 'indicators',
+    icon: <StockOutlined />,
     label: 'Indicators',
   },
   ['superadmin'].includes(role) && {

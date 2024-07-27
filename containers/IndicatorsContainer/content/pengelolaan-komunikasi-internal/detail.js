@@ -1,7 +1,12 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import RoleComponentRender from '@/components/role-component-render'
 import { ProfileContext } from '@/context/profileContextProvider'
-import { formatDate } from '@/helpers/utils'
+import {
+  checkConditionAddItem,
+  checkConditionDeleteItem,
+  checkConditionEditItem,
+  formatDate,
+} from '@/helpers/utils'
 import LayoutIndicators from '@/layout/indicators'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import {
@@ -32,16 +37,17 @@ import { useContext, useState } from 'react'
 const Add = dynamic(() => import('./drawer/add-child'))
 const Edit = dynamic(() => import('./drawer/edit-child'))
 
-const { Paragraph, Text } = Typography
+const { Text } = Typography
 
-const PengelolaAkunInfluencerDetail = ({ isMobile }) => {
+const PengelolaKomunikasiInternalDetail = ({ isMobile }) => {
   const router = useRouter()
   const profileUser = useContext(ProfileContext)
   const { useMutate } = useQueriesMutation({})
-  const { data: detail } = useQueriesMutation({
-    enabled: !!router?.query?.id,
-    prefixUrl: `/${router?.query?.slug}/${router?.query?.id}`,
-  })
+  const { data: detail, fetchingData: fetchingDataDetail } =
+    useQueriesMutation({
+      enabled: !!router?.query?.id,
+      prefixUrl: `/${router?.query?.slug}/${router?.query?.id}`,
+    })
   const { data, isLoading, fetchingData } = useQueriesMutation({
     enabled: !!router?.query?.id,
     prefixUrl: `/${router?.query?.slug}-item/parent/${router?.query?.id}`,
@@ -102,10 +108,7 @@ const PengelolaAkunInfluencerDetail = ({ isMobile }) => {
       render: (item) => (
         <Space direction="vertical">
           <RoleComponentRender
-            condition={
-              profileUser?.placement === 'executor_unit' &&
-              profileUser?.type === 'creator'
-            }
+            condition={checkConditionEditItem({ data: item })}
           >
             <Button
               type="dashed"
@@ -123,10 +126,7 @@ const PengelolaAkunInfluencerDetail = ({ isMobile }) => {
             View
           </Button>
           <RoleComponentRender
-            condition={
-              profileUser?.placement === 'executor_unit' &&
-              profileUser?.type === 'creator'
-            }
+            condition={checkConditionDeleteItem({ data: item })}
           >
             <Button
               danger
@@ -146,19 +146,19 @@ const PengelolaAkunInfluencerDetail = ({ isMobile }) => {
     <Space key="descktop-action-pegawai">
       <Button
         icon={<ReloadOutlined />}
-        onClick={() =>
+        onClick={() => {
+          fetchingDataDetail({
+            prefixUrl: `/${router?.query?.slug}/${router?.query?.id}`,
+          })
           fetchingData({
             prefixUrl: `/${router?.query?.slug}-item/parent/${router?.query?.id}`,
           })
-        }
+        }}
       >
         Reload Data
       </Button>
       <RoleComponentRender
-        condition={
-          profileUser?.placement === 'executor_unit' &&
-          profileUser?.type === 'creator'
-        }
+        condition={checkConditionAddItem({ user: profileUser })}
       >
         <Button
           type="primary"
@@ -179,14 +179,14 @@ const PengelolaAkunInfluencerDetail = ({ isMobile }) => {
     {
       key: '1',
       label: 'Period Date',
-      children: `${dayjs(new Date(detail?.data?.period_date))
+      children: `${detail?.data?.period_date ? dayjs(new Date(detail?.data?.period_date))
         .locale('id')
-        .format('YYYY MMMM')}`,
+        .format('YYYY MMMM') : '' }`,
     },
     {
       key: '2',
       label: 'Target',
-      children: `${detail?.data?.target}`,
+      children: `${detail?.data?.target ?? '0'}`,
     },
   ]
 
@@ -270,4 +270,4 @@ const PengelolaAkunInfluencerDetail = ({ isMobile }) => {
   )
 }
 
-export default PengelolaAkunInfluencerDetail
+export default PengelolaKomunikasiInternalDetail

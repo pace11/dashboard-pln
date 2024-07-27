@@ -1,4 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
+import { getFilename } from '@/helpers/utils'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import {
   CloseOutlined,
@@ -155,21 +156,21 @@ export default function Edit({ isMobile, onClose, isOpen }) {
         setFileList(JSON.parse(isOpen?.attachment_images))
       }
       if (!!isOpen?.attachment_images) {
-        setVideoList(JSON.parse(isOpen?.attachment_images))
+        setVideoList(JSON.parse(isOpen?.attachment_videos))
       }
     }
   }, [isOpen, form])
 
   return (
     <Drawer
-      title={isMobile ? false : 'Edit Post'}
+      title={!!isOpen?.isViewOnly ? 'View' : 'Edit'}
       width={isMobile ? '100%' : 900}
       placement={isMobile ? 'bottom' : 'right'}
       onClose={showConfirmClose}
       open={isOpen}
       bodyStyle={{ paddingBottom: 80 }}
       extra={
-        <Space>
+        <Space hidden={!!isOpen?.isViewOnly}>
           <Button
             onClick={showConfirmClose}
             icon={<CloseOutlined />}
@@ -216,7 +217,11 @@ export default function Edit({ isMobile, onClose, isOpen }) {
             },
           ]}
         >
-          <Input.TextArea size="large" placeholder="Title ..." />
+          <Input.TextArea
+            size="large"
+            placeholder="Title ..."
+            readOnly={!!isOpen?.isViewOnly}
+          />
         </Form.Item>
         <Form.Item label="Attachment Image" name="attachment_images">
           <UploadImage
@@ -224,6 +229,7 @@ export default function Edit({ isMobile, onClose, isOpen }) {
             onChange={HandleChangeUpload}
             onBeforeUpload={HandleBeforeUpload}
             maxLength={20}
+            disabled={!!isOpen?.isViewOnly}
           />
         </Form.Item>
         <Form.Item label="Attachment Video" name="attachment_videos">
@@ -233,6 +239,7 @@ export default function Edit({ isMobile, onClose, isOpen }) {
             onBeforeUpload={HandleBeforeUploadVideo}
             maxLength={20}
             type="text"
+            disabled={!!isOpen?.isViewOnly}
           />
         </Form.Item>
         <Form.Item
@@ -249,6 +256,7 @@ export default function Edit({ isMobile, onClose, isOpen }) {
             rows={6}
             size="large"
             placeholder="Caption ..."
+            readOnly={!!isOpen?.isViewOnly}
           />
         </Form.Item>
         <Form.Item hidden>

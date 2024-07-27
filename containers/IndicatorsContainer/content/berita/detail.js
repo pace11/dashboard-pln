@@ -39,7 +39,7 @@ const Edit = dynamic(() => import('./drawer/edit-child'))
 
 const { Text } = Typography
 
-const PengelolaInformasiPublicDetail = ({ isMobile }) => {
+const BeritaDetail = ({ isMobile }) => {
   const router = useRouter()
   const profileUser = useContext(ProfileContext)
   const { useMutate } = useQueriesMutation({})
@@ -83,6 +83,10 @@ const PengelolaInformasiPublicDetail = ({ isMobile }) => {
       render: (item) => <Text>{item?.unit?.title}</Text>,
     },
     {
+      title: 'Realization',
+      render: ({ realization }) => <Text>{realization}</Text>,
+    },
+    {
       title: 'Percentage',
       render: ({ value }) => <Text>{value ? `${value}%` : '0'}</Text>,
     },
@@ -122,7 +126,9 @@ const PengelolaInformasiPublicDetail = ({ isMobile }) => {
             View
           </Button>
           <RoleComponentRender
-            condition={checkConditionDeleteItem({ data: item })}
+            condition={checkConditionDeleteItem({
+              data: item,
+            })}
           >
             <Button
               danger
@@ -178,6 +184,11 @@ const PengelolaInformasiPublicDetail = ({ isMobile }) => {
       children: `${detail?.data?.period_date ? dayjs(new Date(detail?.data?.period_date))
         .locale('id')
         .format('YYYY MMMM') : '' }`,
+    },
+    {
+      key: '2',
+      label: 'Target',
+      children: `${detail?.data?.target ?? '0'}`,
     },
   ]
 
@@ -261,4 +272,4 @@ const PengelolaInformasiPublicDetail = ({ isMobile }) => {
   )
 }
 
-export default PengelolaInformasiPublicDetail
+export default BeritaDetail

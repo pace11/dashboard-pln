@@ -513,7 +513,7 @@ export const checkConditionEdit = ({ data = {} } = {}) => {
       'final_rejected',
       'final_rejected_2',
       'final_rejected_3',
-    ]
+    ].includes(data?.status)
   )
     return true
   return false
@@ -530,6 +530,30 @@ export const checkConditionRecreate = ({ data = {} } = {}) => {
       'final_rejected_3',
     ].includes(data?.status)
   )
+    return true
+  return false
+}
+
+export const checkConditionDelete = ({ data = {} } = {}) =>
+  [
+    'rejected',
+    'final_rejected',
+    'final_rejected_2',
+    'final_rejected_3',
+  ].includes(data?.status)
+
+export const checkConditionEditItem = ({ data = {} } = {}) => {
+  if (!!data?.is_own_post || !!data?.is_creator) return true
+  return false
+}
+
+export const checkConditionDeleteItem = ({ data = {} } = {}) => {
+  if (!!data?.is_own_post) return true
+  return false
+}
+
+export const checkConditionAddItem = ({ user = {} } = {}) => {
+  if (user?.placement === 'executor_unit' && user?.type === 'creator')
     return true
   return false
 }
@@ -552,3 +576,14 @@ export function validURL(str) {
   ) // fragment locator
   return !!pattern.test(str)
 }
+
+export const stripHtml = (html) => {
+  let doc = new DOMParser().parseFromString(html, 'text/html')
+  return doc.body.textContent || ''
+}
+
+export const mappingOptionRelease = ({ data = [] } = {}) =>
+  data?.map((item) => ({
+    label: item?.number_release,
+    value: item?.number_release,
+  })) || []
