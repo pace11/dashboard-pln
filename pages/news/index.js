@@ -160,9 +160,14 @@ const News = ({ isMobile }) => {
     },
     {
       title: 'Number Release',
-      render: ({ number_release }) => (
-        <Paragraph ellipsis={{ rows: 5 }}>{number_release}</Paragraph>
-      ),
+      render: ({ number_release }) =>
+        number_release ? (
+          <Paragraph ellipsis={{ rows: 5 }} copyable>
+            {number_release}
+          </Paragraph>
+        ) : (
+          '-'
+        ),
     },
     {
       title: 'Slug',

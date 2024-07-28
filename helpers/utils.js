@@ -552,8 +552,8 @@ export const checkConditionDeleteItem = ({ data = {} } = {}) => {
   return false
 }
 
-export const checkConditionAddItem = ({ user = {} } = {}) => {
-  if (user?.placement === 'executor_unit' && user?.type === 'creator')
+export const checkConditionAddItem = ({ user = {}, detail = {} } = {}) => {
+  if (user?.placement === 'executor_unit' && user?.type === 'creator' && ['current'].includes(detail?.date_status))
     return true
   return false
 }

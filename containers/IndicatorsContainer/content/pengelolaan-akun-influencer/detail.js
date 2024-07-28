@@ -158,7 +158,7 @@ const PengelolaAkunInfluencerDetail = ({ isMobile }) => {
         Reload Data
       </Button>
       <RoleComponentRender
-        condition={checkConditionAddItem({ user: profileUser })}
+        condition={checkConditionAddItem({ user: profileUser, detail: detail?.data })}
       >
         <Button
           type="primary"

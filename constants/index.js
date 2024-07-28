@@ -61,6 +61,7 @@ module.exports = {
   MEDIA_TYPE_VALUE: {
     cetak: 20,
     online: 10,
-    tv: 30,
+    tv: 60,
+    yt: 10,
   },
 }

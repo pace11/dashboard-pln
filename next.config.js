@@ -3,7 +3,7 @@
 const { version } = require('./package.json')
 
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   webpack: (config) => {
     const cf = config
     cf.resolve.fallback = { fs: false }

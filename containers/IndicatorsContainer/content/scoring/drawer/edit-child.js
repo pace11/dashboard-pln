@@ -31,6 +31,7 @@ export default function EditChild({ isMobile, onClose, isOpen }) {
     cetak: [],
     online: [],
     tv: [],
+    yt: [],
   })
 
   const onSubmitClick = () => {
@@ -102,7 +103,7 @@ export default function EditChild({ isMobile, onClose, isOpen }) {
   return (
     <Drawer
       title={isOpen?.isViewOnly ? 'View' : 'Edit'}
-      width={isMobile ? '100%' : 900}
+      width={isMobile ? '100%' : 1000}
       placement={isMobile ? 'bottom' : 'right'}
       onClose={showConfirmClose}
       open={isOpen}
@@ -144,7 +145,7 @@ export default function EditChild({ isMobile, onClose, isOpen }) {
         labelAlign="left"
       >
         <Row gutter={[24, 24]}>
-          <Col span={8}>
+          <Col span={6}>
             <Row>
               <Col span={24}>
                 <Form.Item label="Media Online">
@@ -217,7 +218,7 @@ export default function EditChild({ isMobile, onClose, isOpen }) {
               </Col>
             </Row>
           </Col>
-          <Col span={8}>
+          <Col span={6}>
             <Row>
               <Col span={24}>
                 <Form.Item label="Media Cetak">
@@ -288,7 +289,7 @@ export default function EditChild({ isMobile, onClose, isOpen }) {
               </Col>
             </Row>
           </Col>
-          <Col span={8}>
+          <Col span={6}>
             <Row>
               <Col span={24}>
                 <Form.Item label="Media Televisi">
@@ -355,6 +356,77 @@ export default function EditChild({ isMobile, onClose, isOpen }) {
                   type="default"
                   hidden={!!isOpen?.isViewOnly}
                   onClick={() => handleAddRowMedia({ type: 'tv' })}
+                />
+              </Col>
+            </Row>
+          </Col>
+          <Col span={6}>
+            <Row>
+              <Col span={24}>
+                <Form.Item label="Media Youtube">
+                  <Row gutter={[16, 16]}>
+                    <Col span={24}>
+                      <Typography.Paragraph
+                        style={{ textAlign: 'center' }}
+                      >
+                        {countMediaType({ type: 'yt' })}
+                      </Typography.Paragraph>
+                    </Col>
+                    {media?.yt?.map((item, idx) => (
+                      <Col key={idx} span={24}>
+                        <Space.Compact>
+                          <Input
+                            value={item?.link}
+                            placeholder="Link ..."
+                            size="large"
+                            onChange={(e) =>
+                              handleChangeValue({
+                                type: 'yt',
+                                index: idx,
+                                value: e.target.value,
+                              })
+                            }
+                          />
+                          <Button
+                            danger={!isOpen?.isViewOnly}
+                            type="primary"
+                            icon={
+                              isOpen?.isViewOnly ? (
+                                <LinkOutlined />
+                              ) : (
+                                <DeleteOutlined />
+                              )
+                            }
+                            size="large"
+                            onClick={() => {
+                              if (
+                                !!isOpen?.isViewOnly &&
+                                validURL(item?.link)
+                              ) {
+                                window.open(`${item?.link}`, '_blank')
+                              }
+
+                              if (!isOpen?.isViewOnly) {
+                                handleDeleteRowMedia({
+                                  type: 'yt',
+                                  index: idx,
+                                })
+                              }
+                            }}
+                          />
+                        </Space.Compact>
+                      </Col>
+                    ))}
+                  </Row>
+                </Form.Item>
+              </Col>
+              <Col span={24}>
+                <Button
+                  icon={<PlusOutlined />}
+                  style={{ width: '50px' }}
+                  type="default"
+                  hidden={!!isOpen?.isViewOnly}
+                  onClick={() => handleAddRowMedia({ type: 'yt' })}
                 />
               </Col>
             </Row>
