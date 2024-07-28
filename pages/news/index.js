@@ -12,6 +12,7 @@ import {
   formatDate,
   imagePreview,
   labelStatus,
+  labelYesNo,
   roleUser,
 } from '@/helpers/utils'
 import { useDownloadFile } from '@/lib/hooks/useDownloadFile'
@@ -182,6 +183,18 @@ const News = ({ isMobile }) => {
           {categories?.title}
         </Tag>
       ),
+    },
+    {
+      title: 'Posted',
+      key: 'posted',
+      dataIndex: 'posted',
+      render: (posted) => labelYesNo(posted),
+    },
+    {
+      title: 'Banner',
+      key: 'banner',
+      dataIndex: 'banner',
+      render: (banner) => labelYesNo(banner),
     },
     {
       title: 'Status',

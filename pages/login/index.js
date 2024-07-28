@@ -3,7 +3,7 @@
 /* eslint-disable no-console */
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import { LockTwoTone, MailTwoTone } from '@ant-design/icons'
-import { Button, Card, Form, Input, Row } from 'antd'
+import { Button, Card, Col, Form, Input, Row, Typography } from 'antd'
 import Cookies from 'js-cookie'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -33,98 +33,151 @@ const Login = () => {
 
   return (
     <Row
-      justify="center"
-      align="middle"
       style={{
+        alignItems: 'center',
         height: '100vh',
         background: '#f5f5f5',
-        flexDirection: 'column',
+        width: '100%',
       }}
     >
-      <Card bordered={false} style={{ width: '350px' }}>
-        <h2
-          style={{
-            textAlign: 'center',
-            margin: 0,
-            padding: 0,
-            fontWeight: 'bold',
-          }}
-        >
-          DASHBOARD KOM TJSL P3BS
-        </h2>
-        <p style={{ textAlign: 'center' }}>
-          <Image
-            src="/pln-logo.png"
-            alt="pln-logo"
-            width={100}
-            height={130}
-          />
-        </p>
-        <Form
-          name="basic"
-          labelCol={{
-            span: 24,
-          }}
-          wrapperCol={{
-            span: 24,
-          }}
-          initialValues={{
-            remember: true,
-          }}
-          onFinish={onFinish}
-          // onFinishFailed={onFinishFailed}
-          autoComplete="off"
-          labelAlign="left"
-        >
-          <Form.Item
-            name="email"
-            rules={[
-              {
-                type: 'email',
-                required: true,
-                message: 'Harap isikan format email valid!',
-              },
-            ]}
+      <Col
+        span={14}
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          background: '#164e63',
+          height: '100vh',
+          borderRadius: '25% 27% 27% 25% / 0% 50% 50% 0%',
+        }}
+      >
+        <Row>
+          <Col
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyItems: 'center',
+              alignContent: 'space-between',
+            }}
           >
-            <Input
-              prefix={<MailTwoTone twoToneColor="#1890FF" />}
-              placeholder="Email ..."
-              size="large"
+            <Image
+              src="/bumn.png"
+              alt="pln-logo"
+              width={150}
+              height={100}
+              style={{ borderRadius: '10px' }}
             />
-          </Form.Item>
-
-          <Form.Item
-            name="password"
-            rules={[
-              {
-                required: true,
-                message: 'Harap isikan password!',
-              },
-            ]}
+            <Image
+              src="/login-wall.jpg"
+              alt="pln-logo"
+              width={600}
+              height={400}
+              style={{ borderRadius: '10px' }}
+            />
+            <div>
+              <Typography.Title
+                level={1}
+                style={{ padding: 0, margin: 0, color: '#fff' }}
+              >
+                Digitalisasi Komunikasi dan TJSL
+              </Typography.Title>
+              <Typography.Title
+                level={3}
+                style={{ padding: 0, margin: 0, color: '#fff' }}
+              >
+                Lebih Mudah, Lebih Cepat, Realtime dan Lebih Efektif
+              </Typography.Title>
+            </div>
+          </Col>
+        </Row>
+      </Col>
+      <Col
+        span={10}
+        style={{ display: 'flex', justifyContent: 'center' }}
+      >
+        <Card bordered={false} style={{ width: '350px' }}>
+          <h2
+            style={{
+              textAlign: 'center',
+              margin: 0,
+              padding: 0,
+              fontWeight: 'bold',
+            }}
           >
-            <Input.Password
-              prefix={<LockTwoTone twoToneColor="#1890FF" />}
-              placeholder="Password ..."
-              size="large"
+            DASHBOARD KOM TJSL P3BS
+          </h2>
+          <p style={{ textAlign: 'center' }}>
+            <Image
+              src="/pln-logo.png"
+              alt="pln-logo"
+              width={100}
+              height={130}
             />
-          </Form.Item>
-
-          <Form.Item>
-            <Link href="/forgot-password">Forgot Password?</Link>
-          </Form.Item>
-
-          <Form.Item>
-            <Button
-              loading={isLoadingSubmit}
-              type="primary"
-              htmlType="submit"
-              block
+          </p>
+          <Form
+            name="basic"
+            labelCol={{
+              span: 24,
+            }}
+            wrapperCol={{
+              span: 24,
+            }}
+            initialValues={{
+              remember: true,
+            }}
+            onFinish={onFinish}
+            // onFinishFailed={onFinishFailed}
+            autoComplete="off"
+            labelAlign="left"
+          >
+            <Form.Item
+              name="email"
+              rules={[
+                {
+                  type: 'email',
+                  required: true,
+                  message: 'Harap isikan format email valid!',
+                },
+              ]}
             >
-              LOGIN
-            </Button>
-          </Form.Item>
+              <Input
+                prefix={<MailTwoTone twoToneColor="#1890FF" />}
+                placeholder="Email ..."
+                size="large"
+              />
+            </Form.Item>
 
-          {/* <Form.Item>
+            <Form.Item
+              name="password"
+              rules={[
+                {
+                  required: true,
+                  message: 'Harap isikan password!',
+                },
+              ]}
+            >
+              <Input.Password
+                prefix={<LockTwoTone twoToneColor="#1890FF" />}
+                placeholder="Password ..."
+                size="large"
+              />
+            </Form.Item>
+
+            <Form.Item>
+              <Link href="/forgot-password">Forgot Password?</Link>
+            </Form.Item>
+
+            <Form.Item>
+              <Button
+                loading={isLoadingSubmit}
+                type="primary"
+                htmlType="submit"
+                block
+              >
+                LOGIN
+              </Button>
+            </Form.Item>
+
+            {/* <Form.Item>
             <p style={{ textAlign: 'center' }}>
               Belum punya akun sebelumnya?{' '}
               <Link className="register" href="/register">
@@ -132,8 +185,9 @@ const Login = () => {
               </Link>
             </p>
           </Form.Item> */}
-        </Form>
-      </Card>
+          </Form>
+        </Card>
+      </Col>
     </Row>
   )
 }

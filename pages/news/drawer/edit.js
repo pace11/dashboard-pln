@@ -1,4 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
+import RoleComponentRender from '@/components/role-component-render'
 import { ProfileContext } from '@/context/profileContextProvider'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import {
@@ -17,6 +18,7 @@ import {
   Row,
   Select,
   Space,
+  Switch,
 } from 'antd'
 import dynamic from 'next/dynamic'
 import { useContext, useEffect, useRef, useState } from 'react'
@@ -162,7 +164,6 @@ export default function Edit({ isMobile, onClose, isOpen }) {
       placement={isMobile ? 'bottom' : 'right'}
       onClose={showConfirmClose}
       open={isOpen}
-      bodyStyle={{ paddingBottom: 80 }}
       extra={
         <Space>
           <Button
@@ -267,10 +268,10 @@ export default function Edit({ isMobile, onClose, isOpen }) {
               </Select>
             </Form.Item>
           </Col>
-          {/* <RoleComponentRender
+          <RoleComponentRender
             condition={
-              !!isOpen?.is_superadmin ||
-              profileUser?.placement === 'main_office'
+              profileUser?.placement === 'main_office' &&
+              ['final_approved_3'].includes(isOpen?.status)
             }
           >
             <Col span={3}>
@@ -283,12 +284,10 @@ export default function Edit({ isMobile, onClose, isOpen }) {
                 <Switch />
               </Form.Item>
             </Col>
-          </RoleComponentRender> */}
+          </RoleComponentRender>
         </Row>
         <Form.Item label="Description" name="description">
-          <TextEditor
-            onChange={(value) => console.log('value', value)}
-          />
+          <TextEditor />
         </Form.Item>
         <Form.Item hidden>
           <Button ref={refButton} type="primary" htmlType="submit">

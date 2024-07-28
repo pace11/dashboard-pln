@@ -1,18 +1,26 @@
 /* eslint-disable react-hooks/rules-of-hooks */
+import DownloadExcelFile from '@/components/download-excel-file'
 import RoleComponentRender from '@/components/role-component-render'
 import { IMAGE_FALLBACK, KEY_STEP } from '@/constants'
+import {
+  columnsTitleListNews,
+  toExportNewsData,
+} from '@/constants/columnDownloadNews'
 import { ProfileContext } from '@/context/profileContextProvider'
 import {
   approvedStatus,
   checkConditionApprovedRejected,
   checkConditionEdit,
   checkConditionRecreate,
+  labelYesNo,
   rejectedStatus,
   stepProgress,
 } from '@/helpers/utils'
+import { useDownloadFile } from '@/lib/hooks/useDownloadFile'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import {
   ArrowLeftOutlined,
+  DownloadOutlined,
   EditOutlined,
   ExclamationCircleOutlined,
   FileDoneOutlined,
@@ -32,6 +40,7 @@ import {
   Row,
   Space,
   Steps,
+  Switch,
   Typography,
 } from 'antd'
 import dynamic from 'next/dynamic'
@@ -55,6 +64,13 @@ export default function PostsDetail({ isMobile }) {
     enabled: !!router?.query?.id,
     prefixUrl: `/post/${router?.query?.id}`,
   })
+
+  const {
+    downloadFile,
+    fileName,
+    data: dataDownload,
+    isLoading: isLoadingDownload,
+  } = useDownloadFile()
 
   const { isLoadingSubmit, useMutate } = useQueriesMutation({})
 
@@ -83,16 +99,12 @@ export default function PostsDetail({ isMobile }) {
           <Form.Item label="Remarks" name="remarks">
             <Input.TextArea size="large" placeholder="Remarks ..." />
           </Form.Item>
-          {/* {[
-            'final_checked',
-            'final_approved',
-            'final_approved_2',
-          ].includes(detailPost?.data?.status) &&
+          {['final_approved_2'].includes(detailPost?.data?.status) &&
             type !== 'rejected' && (
               <Form.Item label="Posted" name="posted">
                 <Switch />
               </Form.Item>
-            )} */}
+            )}
         </Form>
       ),
       icon: <ExclamationCircleOutlined />,
@@ -138,6 +150,12 @@ export default function PostsDetail({ isMobile }) {
 
   return (
     <>
+      {!!fileName && (
+        <DownloadExcelFile
+          fileName={fileName}
+          dataDownload={dataDownload}
+        />
+      )}
       <Card
         title={
           <Space>
@@ -267,6 +285,25 @@ export default function PostsDetail({ isMobile }) {
                 Re-create News
               </Button>
             </RoleComponentRender>
+            <Button
+              type="primary"
+              icon={<DownloadOutlined />}
+              onClick={() =>
+                downloadFile({
+                  prefixUrl: `/posts/download/${router?.query?.id}`,
+                  fileName: 'Data Post Detail',
+                  mappingData: [{ columns: columnsTitleListNews }],
+                  exportDownload: toExportNewsData,
+                })
+              }
+              hidden={
+                !['final_approved_3'].includes(
+                  detailPost?.data?.status,
+                )
+              }
+            >
+              Download
+            </Button>
           </Space>,
         ]}
       >
@@ -325,7 +362,7 @@ export default function PostsDetail({ isMobile }) {
                       </Typography.Text>
                     </Form.Item>
                   </Col>
-                  {/* <Col span={4}>
+                  <Col span={4}>
                     <Form.Item label="Posted" name="posted">
                       {labelYesNo(detailPost?.data?.posted)}
                     </Form.Item>
@@ -334,7 +371,7 @@ export default function PostsDetail({ isMobile }) {
                     <Form.Item label="Banner" name="banner">
                       {labelYesNo(detailPost?.data?.banner)}
                     </Form.Item>
-                  </Col> */}
+                  </Col>
                 </Row>
                 <Row gutter={[24, 24]}>
                   <Col span={24}>

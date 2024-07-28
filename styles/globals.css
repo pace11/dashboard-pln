@@ -13,3 +13,9 @@ body {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+.bg-login {
+  background-color: #ffffff;
+  opacity: 0.1;
+  background: linear-gradient(135deg, #b9c9d055 25%, transparent 25%) -40px 0/ 80px 80px, linear-gradient(225deg, #b9c9d0 25%, transparent 25%) -40px 0/ 80px 80px, linear-gradient(315deg, #b9c9d055 25%, transparent 25%) 0px 0/ 80px 80px, linear-gradient(45deg, #b9c9d0 25%, #ffffff 25%) 0px 0/ 80px 80px;
+}

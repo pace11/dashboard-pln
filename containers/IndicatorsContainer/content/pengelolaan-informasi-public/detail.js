@@ -11,6 +11,7 @@ import LayoutIndicators from '@/layout/indicators'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import {
   ArrowLeftOutlined,
+  CloseOutlined,
   DeleteOutlined,
   EditOutlined,
   ExclamationCircleOutlined,
@@ -58,6 +59,28 @@ const PengelolaInformasiPublicDetail = ({ isMobile }) => {
   const showConfirmDelete = (params) => {
     Modal.confirm({
       title: 'Delete Confirm',
+      content: <p>Are you sure ?</p>,
+      icon: <ExclamationCircleOutlined />,
+      okText: 'Yes',
+      cancelText: 'No',
+      onOk: async () => {
+        const response = await useMutate({
+          prefixUrl: `/${router?.query?.slug}-item/${params?.id}`,
+          method: 'DELETE',
+        })
+        if (response?.success) {
+          fetchingData({
+            prefixUrl: `/${router?.query?.slug}-item/parent/${router?.query?.id}`,
+          })
+        }
+      },
+      onCancel: () => {},
+    })
+  }
+
+  const showConfirmReject = (params) => {
+    Modal.confirm({
+      title: 'Reject Confirm',
       content: <p>Are you sure ?</p>,
       icon: <ExclamationCircleOutlined />,
       okText: 'Yes',
@@ -133,6 +156,16 @@ const PengelolaInformasiPublicDetail = ({ isMobile }) => {
               Delete
             </Button>
           </RoleComponentRender>
+          <RoleComponentRender condition={!!item?.is_creator}>
+            <Button
+              danger
+              type="primary"
+              icon={<CloseOutlined />}
+              onClick={() => showConfirmReject(item)}
+            >
+              Reject
+            </Button>
+          </RoleComponentRender>
         </Space>
       ),
     },
@@ -154,7 +187,10 @@ const PengelolaInformasiPublicDetail = ({ isMobile }) => {
         Reload Data
       </Button>
       <RoleComponentRender
-        condition={checkConditionAddItem({ user: profileUser, detail: detail?.data })}
+        condition={checkConditionAddItem({
+          user: profileUser,
+          detail: detail?.data,
+        })}
       >
         <Button
           type="primary"
@@ -175,9 +211,13 @@ const PengelolaInformasiPublicDetail = ({ isMobile }) => {
     {
       key: '1',
       label: 'Period Date',
-      children: `${detail?.data?.period_date ? dayjs(new Date(detail?.data?.period_date))
-        .locale('id')
-        .format('YYYY MMMM') : '' }`,
+      children: `${
+        detail?.data?.period_date
+          ? dayjs(new Date(detail?.data?.period_date))
+              .locale('id')
+              .format('YYYY MMMM')
+          : ''
+      }`,
     },
   ]
 

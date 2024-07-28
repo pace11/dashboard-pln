@@ -1,7 +1,8 @@
 /* eslint-disable react-hooks/rules-of-hooks */
+import RoleComponentRender from '@/components/role-component-render'
 import { getFilename } from '@/helpers/utils'
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
-import { CloseOutlined, SaveOutlined } from '@ant-design/icons'
+import { CloseOutlined, ExclamationCircleOutlined, SaveOutlined } from '@ant-design/icons'
 import { Button, Drawer, Form, Space, notification } from 'antd'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
@@ -37,6 +38,27 @@ export default function EditChild({ isMobile, onClose, isOpen }) {
       onClose()
       form.resetFields()
     }
+  }
+
+  const showConfirmReject = (params) => {
+    Modal.confirm({
+      title: 'Reject Confirm',
+      content: <p>Are you sure ?</p>,
+      icon: <ExclamationCircleOutlined />,
+      okText: 'Yes',
+      cancelText: 'No',
+      onOk: async () => {
+        const response = await useMutate({
+          prefixUrl: `/${router?.query?.slug}-item/${params?.id}`,
+          method: 'DELETE',
+        })
+        if (response?.success) {
+          onClose()
+          form.resetFields()
+        }
+      },
+      onCancel: () => {},
+    })
   }
 
   const showConfirmClose = () => {
@@ -104,11 +126,22 @@ export default function EditChild({ isMobile, onClose, isOpen }) {
       onClose={showConfirmClose}
       open={isOpen}
       extra={
-        <Space hidden={!!isOpen?.isViewOnly}>
+        <Space>
+          <RoleComponentRender condition={!!isOpen?.is_creator}>
+            <Button
+              danger
+              type="primary"
+              icon={<CloseOutlined />}
+              onClick={() => showConfirmReject(item)}
+            >
+              Reject
+            </Button>
+          </RoleComponentRender>
           <Button
             onClick={showConfirmClose}
             icon={<CloseOutlined />}
             disabled={isLoadingSubmit}
+            hidden={!!isOpen?.isViewOnly}
           >
             Cancel
           </Button>
@@ -117,6 +150,7 @@ export default function EditChild({ isMobile, onClose, isOpen }) {
             icon={<SaveOutlined />}
             type="primary"
             loading={isLoadingSubmit}
+            hidden={!!isOpen?.isViewOnly}
           >
             Save
           </Button>
