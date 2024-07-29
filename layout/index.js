@@ -60,11 +60,11 @@ const LayoutApp = ({ children, isMobile }) => {
   }
 
   const items = ({ role = '' }) => [
-    // {
-    //   key: 'profile',
-    //   label: 'Profile',
-    //   icon: <UserOutlined />,
-    // },
+    {
+      key: 'profile',
+      label: 'Profile',
+      icon: <UserOutlined />,
+    },
     {
       key: 'notifications',
       label: <Badge dot>Notifications</Badge>,

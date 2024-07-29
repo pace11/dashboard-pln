@@ -3,7 +3,7 @@
 /* eslint-disable no-console */
 import { useQueriesMutation } from '@/lib/hooks/useQueriesMutation'
 import { LockTwoTone, MailTwoTone } from '@ant-design/icons'
-import { Button, Card, Col, Form, Input, Row, Typography } from 'antd'
+import { Button, Card, Col, Flex, Form, Input, Row } from 'antd'
 import Cookies from 'js-cookie'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -45,48 +45,38 @@ const Login = () => {
         style={{
           display: 'flex',
           justifyContent: 'center',
-          background: '#164e63',
+          background: '#03556b',
           height: '100vh',
           borderRadius: '25% 27% 27% 25% / 0% 50% 50% 0%',
         }}
       >
         <Row>
-          <Col
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              justifyItems: 'center',
-              alignContent: 'space-between',
-            }}
-          >
-            <Image
-              src="/bumn.png"
-              alt="pln-logo"
-              width={150}
-              height={100}
-              style={{ borderRadius: '10px' }}
-            />
-            <Image
-              src="/login-wall.jpg"
-              alt="pln-logo"
-              width={600}
-              height={400}
-              style={{ borderRadius: '10px' }}
-            />
-            <div>
-              <Typography.Title
-                level={1}
-                style={{ padding: 0, margin: 0, color: '#fff' }}
-              >
-                Digitalisasi Komunikasi dan TJSL
-              </Typography.Title>
-              <Typography.Title
-                level={3}
-                style={{ padding: 0, margin: 0, color: '#fff' }}
-              >
-                Lebih Mudah, Lebih Cepat, Realtime dan Lebih Efektif
-              </Typography.Title>
-            </div>
+          <Col>
+            <Flex
+              justify="center"
+              vertical
+              style={{ height: '100%' }}
+            >
+              <div>
+                <Image
+                  src="/bumn.png"
+                  alt="pln-logo"
+                  width={150}
+                  height={100}
+                  style={{ borderRadius: '10px' }}
+                  quality={100}
+                />
+              </div>
+              <div>
+                <Image
+                  src="/new-login-wall.jpg"
+                  alt="pln-logo"
+                  width={600}
+                  height={600}
+                  style={{ borderRadius: '10px' }}
+                />
+              </div>
+            </Flex>
           </Col>
         </Row>
       </Col>
@@ -94,7 +84,7 @@ const Login = () => {
         span={10}
         style={{ display: 'flex', justifyContent: 'center' }}
       >
-        <Card bordered={false} style={{ width: '350px' }}>
+        <Card bordered={false} style={{ width: '400px' }}>
           <h2
             style={{
               textAlign: 'center',
@@ -172,6 +162,7 @@ const Login = () => {
                 type="primary"
                 htmlType="submit"
                 block
+                size="large"
               >
                 LOGIN
               </Button>
