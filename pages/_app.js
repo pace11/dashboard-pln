@@ -28,12 +28,38 @@ export default function App({ Component, pageProps }) {
   }
 
   if (!isAuthorized) {
-    return <Component {...pageProps} isMobile={isMobile} />
+    return (
+      <ConfigProvider
+        theme={{
+          token: {
+            color: COLOR.PRIMARY,
+            colorPrimaryHover: COLOR.PRIMARY_HOVER,
+          },
+          components: {
+            Button: {
+              colorPrimary: COLOR.PRIMARY,
+              colorPrimaryActive: COLOR.PRIMARY,
+              colorPrimaryHover: COLOR.PRIMARY_HOVER,
+            },
+            Input: {
+              activeBorderColor: COLOR.PRIMARY,
+              hoverBorderColor: COLOR.PRIMARY,
+            },
+          },
+        }}
+      >
+        <Component {...pageProps} isMobile={isMobile} />
+      </ConfigProvider>
+    )
   }
 
   return (
     <ConfigProvider
       theme={{
+        token: {
+          color: COLOR.PRIMARY,
+          colorPrimaryHover: COLOR.PRIMARY_HOVER,
+        },
         components: {
           Menu: {
             itemSelectedColor: COLOR.PRIMARY,

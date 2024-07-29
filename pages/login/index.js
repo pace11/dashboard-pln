@@ -36,8 +36,12 @@ const Login = () => {
       style={{
         alignItems: 'center',
         height: '100vh',
-        background: '#f5f5f5',
         width: '100%',
+        // backgroundImage: 'linear-gradient(to left bottom, #03556b, #597b92, #95a3b6, #cdcfda, #ffffff)'
+        backgroundColor: '#ffffff',
+        opacity: '1',
+        backgroundImage:
+          'repeating-radial-gradient( circle at 0 0, transparent 0, #ffffff 40px ), repeating-linear-gradient( #f6f6f655, #f6f6f6 )',
       }}
     >
       <Col
@@ -48,6 +52,7 @@ const Login = () => {
           background: '#03556b',
           height: '100vh',
           borderRadius: '25% 27% 27% 25% / 0% 50% 50% 0%',
+          boxShadow: '0px 0px 43px 4px #03556b',
         }}
       >
         <Row>
