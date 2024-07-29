@@ -26,10 +26,10 @@ export default function AddChild({ isMobile, onClose, isOpenAdd }) {
   const refButton = useRef(null)
   const [form] = Form.useForm()
   const [media, setMedia] = useState({
-    cetak: [],
-    online: [],
-    tv: [],
-    yt: [],
+    cetak: [{link: '', value: 0}],
+    online: [{link: '', value: 0}],
+    tv: [{link: '', value: 0}],
+    yt: [{link: '', value: 0}],
   })
 
   const onSubmitClick = () => {

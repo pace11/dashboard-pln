@@ -29,7 +29,12 @@ export default function AddChild({ isMobile, onClose, isOpenAdd }) {
   const { useMutate, isLoadingSubmit } = useQueriesMutation({})
   const refButton = useRef(null)
   const [form] = Form.useForm()
-  const [media, setMedia] = useState([])
+  const [media, setMedia] = useState([
+    {
+      link: '',
+      number_release: ''
+    }
+  ])
 
   const onSubmitClick = () => {
     refButton.current.click()
@@ -186,7 +191,7 @@ export default function AddChild({ isMobile, onClose, isOpenAdd }) {
           <Col span={24}>
             <Button
               icon={<PlusOutlined />}
-              style={{ width: '50px' }}
+              style={{ width: '80px' }}
               type="default"
               onClick={() => handleAddRowMedia()}
             />
