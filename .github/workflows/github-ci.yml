@@ -6,7 +6,7 @@ name: Github CI
 on:
   push:
     branches:
-      - master
+      - staging
 
 jobs:
   run-build:
