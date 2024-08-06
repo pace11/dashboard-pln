@@ -1,7 +1,6 @@
 import { COLOR } from '@/constants'
 import { ProfileContext } from '@/context/profileContextProvider'
 import {
-  DatabaseOutlined,
   LogoutOutlined,
   NotificationOutlined,
   ThunderboltOutlined,
@@ -14,7 +13,6 @@ import {
   Layout,
   Menu,
   Row,
-  Tabs,
   Tag,
   Typography,
   theme,
@@ -25,10 +23,9 @@ import { useRouter } from 'next/router'
 import { useContext, useEffect, useState } from 'react'
 import { sidebarMenu } from './menu'
 
-const { Title } = Typography
-const { Header, Content, Footer, Sider } = Layout
+const { Header, Content, Sider } = Layout
 
-const LayoutApp = ({ children, isMobile }) => {
+const LayoutApp = ({ children }) => {
   const router = useRouter()
   const profileUser = useContext(ProfileContext)
   const [collapsed, setCollapsed] = useState(false)
@@ -137,7 +134,6 @@ const LayoutApp = ({ children, isMobile }) => {
           collapsed={collapsed}
           onCollapse={(value) => setCollapsed(value)}
           style={{ background: colorBgContainer }}
-          hidden={isMobile}
         >
           <Menu
             onSelect={HandleMenuSelect}
@@ -156,12 +152,13 @@ const LayoutApp = ({ children, isMobile }) => {
               background: COLOR.PRIMARY,
             }}
           >
-            <Title
+            <Typography.Title
               style={{ margin: 0, padding: 0, color: 'white' }}
               level={5}
             >
-              <DatabaseOutlined /> DASHBOARD PLN
-            </Title>
+              <ThunderboltOutlined />
+              {`DASHBOARD PLN v${process.env.NEXT_PUBLIC_APP_VERSION}`}
+            </Typography.Title>
             <Row>
               <Dropdown.Button
                 size="middle"
@@ -170,7 +167,7 @@ const LayoutApp = ({ children, isMobile }) => {
                   onClick: onMenuClick,
                 }}
               >
-                {!isMobile ? `Hi 👋, ${profileUser?.email}` : ''}
+                {`Hi 👋, ${profileUser?.email}`}
                 <Tag
                   color="green"
                   icon={<UserOutlined />}
@@ -186,7 +183,6 @@ const LayoutApp = ({ children, isMobile }) => {
             style={{
               margin: '0 15px',
               overflowY: 'scroll',
-              paddingBottom: '15px',
             }}
           >
             <Breadcrumb
@@ -201,48 +197,10 @@ const LayoutApp = ({ children, isMobile }) => {
             />
             {children}
           </Content>
-          <Footer
-            style={
-              isMobile
-                ? {
-                    padding: '0 15px',
-                    background: '#FFF',
-                  }
-                : { textAlign: 'center' }
-            }
-          >
-            {isMobile ? (
-              <Tabs
-                defaultActiveKey="/"
-                activeKey={activeKey}
-                items={sidebarMenu().map((item) => {
-                  return {
-                    label: (
-                      <span>
-                        {item?.icon}
-                        {item.label}
-                      </span>
-                    ),
-                    key: item?.key,
-                  }
-                })}
-                onChange={(val) => {
-                  setActiveKey(val)
-                  router.push({
-                    pathname: val === '/' ? '/' : `/${val}`,
-                  })
-                }}
-              />
-            ) : (
-              <span>
-                DASHBOARD PLN <ThunderboltOutlined /> -{' '}
-                <b>{` v${process.env.NEXT_PUBLIC_APP_VERSION}`}</b>
-              </span>
-            )}
-          </Footer>
         </Layout>
       </Layout>
     </>
   )
 }
+
 export default LayoutApp

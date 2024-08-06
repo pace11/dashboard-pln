@@ -64,4 +64,30 @@ module.exports = {
     tv: 60,
     yt: 10,
   },
+  TAB_LIST: [
+    {
+      key: 'berita',
+      tab: '1. Release Berita',
+    },
+    {
+      key: 'media',
+      tab: '2. Photo/Video Media',
+    },
+    {
+      key: 'pengelolaan-akun-influencer',
+      tab: '3. Pengelolaan akun influencer',
+    },
+    {
+      key: 'pengelolaan-komunikasi-internal',
+      tab: '4. Pengelolaan komunikasi internal',
+    },
+    {
+      key: 'scoring',
+      tab: '5. Scoring',
+    },
+    {
+      key: 'pengelolaan-informasi-public',
+      tab: '6. Pengelolaan Informasi Public',
+    },
+  ],
 }

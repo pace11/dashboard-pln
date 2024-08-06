@@ -6,7 +6,16 @@ import {
   ExclamationCircleOutlined,
   SaveOutlined,
 } from '@ant-design/icons'
-import { Button, Drawer, Form, Input, Modal, Space } from 'antd'
+import {
+  Button,
+  Col,
+  Drawer,
+  Form,
+  Input,
+  Modal,
+  Row,
+  Space,
+} from 'antd'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { useRef, useState } from 'react'
@@ -22,6 +31,20 @@ export default function Add({ isMobile, onClose, isOpenAdd }) {
   const [isEditing, setEditing] = useState(false)
   const [fileList, setFileList] = useState([])
   const [videoList, setVideoList] = useState([])
+  const [media, setMedia] = useState([
+    {
+      title: '',
+      images: [],
+      videos: [],
+      caption: '',
+    },
+    {
+      title: '',
+      images: [],
+      videos: [],
+      caption: '',
+    },
+  ])
 
   const onSubmitClick = () => {
     // `current` points to the mounted text input element
@@ -190,51 +213,72 @@ export default function Add({ isMobile, onClose, isOpenAdd }) {
         labelAlign="left"
         onValuesChange={(value) => setEditing(!!value)}
       >
-        <Form.Item
-          label="Title"
-          name="title"
-          rules={[
-            {
-              required: true,
-              message: 'please enter title!',
-            },
-          ]}
-        >
-          <Input.TextArea size="large" placeholder="Title ..." />
-        </Form.Item>
-        <Form.Item label="Attachment Image" name="attachment_images">
-          <UploadImage
-            fileList={fileList}
-            onChange={HandleChangeUpload}
-            onBeforeUpload={HandleBeforeUpload}
-            maxLength={20}
-          />
-        </Form.Item>
-        <Form.Item label="Attachment Video" name="attachment_videos">
-          <UploadImage
-            fileList={videoList}
-            onChange={HandleChangeVideoUpload}
-            onBeforeUpload={HandleBeforeUploadVideo}
-            maxLength={20}
-            type="text"
-          />
-        </Form.Item>
-        <Form.Item
-          label="Caption"
-          name="caption"
-          rules={[
-            {
-              required: true,
-              message: 'please enter caption!',
-            },
-          ]}
-        >
-          <Input.TextArea
-            rows={6}
-            size="large"
-            placeholder="Caption ..."
-          />
-        </Form.Item>
+        {media?.map((item, idx) => (
+          <Row key={idx} gutter={[24, 0]}>
+            <Col span={14}>
+              <Form.Item
+                label="Title"
+                name="title"
+                rules={[
+                  {
+                    required: true,
+                    message: 'please enter title!',
+                  },
+                ]}
+              >
+                <Input.TextArea
+                  size="large"
+                  placeholder="Title ..."
+                />
+              </Form.Item>
+            </Col>
+            <Col span={10}>
+              <Form.Item
+                label="Attachment Image"
+                name="attachment_images"
+              >
+                <UploadImage
+                  fileList={fileList}
+                  onChange={HandleChangeUpload}
+                  onBeforeUpload={HandleBeforeUpload}
+                  maxLength={20}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={14}>
+              <Form.Item
+                label="Caption"
+                name="caption"
+                rules={[
+                  {
+                    required: true,
+                    message: 'please enter caption!',
+                  },
+                ]}
+              >
+                <Input.TextArea
+                  rows={3}
+                  size="large"
+                  placeholder="Caption ..."
+                />
+              </Form.Item>
+            </Col>
+            <Col span={10}>
+              <Form.Item
+                label="Attachment Video"
+                name="attachment_videos"
+              >
+                <UploadImage
+                  fileList={videoList}
+                  onChange={HandleChangeVideoUpload}
+                  onBeforeUpload={HandleBeforeUploadVideo}
+                  maxLength={20}
+                  type="text"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+        ))}
         <Form.Item hidden>
           <Button ref={refButton} type="primary" htmlType="submit">
             Submit

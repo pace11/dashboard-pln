@@ -542,8 +542,18 @@ export const checkConditionDelete = ({ data = {} } = {}) =>
     'final_rejected_3',
   ].includes(data?.status)
 
+export const checkConditionEditParent = ({ data = {} } = {}) => {
+  if (data?.placement === 'main_office' && data?.type === 'creator')
+    return true
+  return false
+}
+
 export const checkConditionEditItem = ({ data = {} } = {}) => {
-  if ((!!data?.is_own_post || !!data?.is_creator) && !data?.is_done_date) return true
+  if (
+    (!!data?.is_own_post || !!data?.is_creator) &&
+    !data?.is_done_date
+  )
+    return true
   return false
 }
 
@@ -552,8 +562,15 @@ export const checkConditionDeleteItem = ({ data = {} } = {}) => {
   return false
 }
 
-export const checkConditionAddItem = ({ user = {}, detail = {} } = {}) => {
-  if (user?.placement === 'executor_unit' && user?.type === 'creator' && ['current'].includes(detail?.date_status))
+export const checkConditionAddItem = ({
+  user = {},
+  detail = {},
+} = {}) => {
+  if (
+    user?.placement === 'executor_unit' &&
+    user?.type === 'creator' &&
+    ['current'].includes(detail?.date_status)
+  )
     return true
   return false
 }
@@ -592,8 +609,8 @@ export const dateStatus = ({ type = '' } = {}) => {
   const mapping = {
     prev: <Tag>Already Passed</Tag>,
     next: <Tag color="blue">Upcoming</Tag>,
-    current: <Tag color="green">Now</Tag>
+    current: <Tag color="green">Now</Tag>,
   }
 
-  return mapping?.[type] ?? mapping.prev;
+  return mapping?.[type] ?? mapping.prev
 }

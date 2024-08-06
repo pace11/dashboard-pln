@@ -1,5 +1,5 @@
 import IndicatorsContainerDetail from '@/containers/IndicatorsContainer/detail'
 
-const IndicatorsDetailById = () => <IndicatorsContainerDetail />
+const IndicatorsDetail = () => <IndicatorsContainerDetail />
 
-export default IndicatorsDetailById
+export default IndicatorsDetail

@@ -10,6 +10,7 @@ const UploadImage = ({
   maxLength = 1,
   disabled = false,
   type = 'picture-card',
+  accept = '',
 }) => {
   const [previewOpen, setPreviewOpen] = useState(false)
   const [previewImage, setPreviewImage] = useState('')
@@ -39,6 +40,8 @@ const UploadImage = ({
         onChange={onChange}
         beforeUpload={onBeforeUpload}
         disabled={disabled}
+        showUploadList
+        accept={accept}
       >
         {fileList.length >= maxLength ? null : (
           <Button

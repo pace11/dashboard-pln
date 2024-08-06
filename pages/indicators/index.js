@@ -1,5 +1,5 @@
-import NewsContainer from '@/containers/IndicatorsContainer/content/berita'
+import IndicatorsContainer from '@/containers/IndicatorsContainer'
 
-const Indicators = () => <NewsContainer />
+const Indicators = () => <IndicatorsContainer />
 
 export default Indicators

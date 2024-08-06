@@ -170,7 +170,10 @@ const MediaDetail = ({ isMobile }) => {
         Reload Data
       </Button>
       <RoleComponentRender
-        condition={checkConditionAddItem({ user: profileUser, detail: detail?.data })}
+        condition={checkConditionAddItem({
+          user: profileUser,
+          detail: detail?.data,
+        })}
       >
         <Button
           type="primary"

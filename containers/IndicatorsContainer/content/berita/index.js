@@ -68,7 +68,7 @@ const Berita = ({ isMobile }) => {
     },
     {
       title: 'Status',
-      render: ({ date_status }) => dateStatus({ type: date_status }) ,
+      render: ({ date_status }) => dateStatus({ type: date_status }),
     },
     {
       title: 'Target',
@@ -151,10 +151,7 @@ const Berita = ({ isMobile }) => {
         Reload Data
       </Button>
       <RoleComponentRender
-        condition={
-          profileUser?.placement === 'main_office' &&
-          profileUser?.type === 'creator'
-        }
+        condition={checkConditionEditParent({ data: profileUser })}
       >
         <Button
           type="primary"
